@@ -1,6 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import axios from 'axios'
+import { PrismaClient } from '@prisma/client';
+import { sign, verify } from 'jsonwebtoken'
+import authMiddleware from './auth';
 
 const app = express();
 app.use(cors())
@@ -22,7 +25,9 @@ type previousContest = {
     contest_time : string
 }
 
-app.get('/contest', async(req, res)=>{
+
+
+app.get('/contest', authMiddleware, async(req : any, res : any)=>{
 
     const codechefContest = await axios.get('https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all')
 
@@ -106,6 +111,83 @@ app.get('/contest', async(req, res)=>{
         previousContest : previousContest.sort((a, b)=> new Date(a.contest_time).getTime()- new Date(b.contest_time).getTime()).reverse()
     })
 
+})
+
+
+app.post('/signup', async(req : any, res : any)=> {
+
+    const {email, password } = req.body
+    try{
+        const prisma =new PrismaClient();
+        const user = await prisma.user.findFirst({
+            where : {
+                name : email
+            }
+        })
+
+        if(user){
+            return res.status(301).json({
+                message : "user already exist"
+            })
+        }
+
+        const newUser = await prisma.user.create({
+            data : {
+                name : email,
+                password : password,
+                userType : "student"
+            }
+        })
+
+        const token = sign({email}, "secret")
+
+        res.status(200).json({
+            message : "signin sucessful",
+            token
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "server error"
+        })
+    }
+})
+
+
+app.post('/signin', async(req : any, res : any)=>{
+
+    const {email, password, userType} = req.body;
+
+    try{
+        const prisma =new PrismaClient();
+
+        const user = await prisma.user.findFirst({
+            where : {
+                name : email,
+                password : password,
+                userType : userType
+            }
+        })
+
+        if(!user){
+            return res.status(301).json({
+                message : "user doesn't exist"
+            })
+        }
+
+        const token = sign({email} , "secret")
+
+        res.status(200).json({
+            message : "signin sucessful",
+            userType : user.userType,
+            token
+        })
+    }
+    catch(e){
+        req.status(404).json({
+            message : "server error"
+        })
+    }
 })
 
 app.listen(3000, ()=>{
