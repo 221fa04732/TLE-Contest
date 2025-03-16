@@ -10,18 +10,25 @@ export default function PastContest(){
         contest_id : string
         contest_name : string
         contest_time : string
+        bookmarked : boolean
+        video : string
     }
 
     const [previousContest, setPreviousContest] = useState<pastContest[]>([])
     const [filterPreviousContest, setFilterPreviousContest] = useState<pastContest[]>([])
     const [typedWord, setTypedword] = useState("")
     const search = DebounceHook(typedWord)
+    const token = localStorage.getItem("tle-token")
 
 
     useEffect(()=>{
 
         const previousData = async()=>{
-                    const response = await axios.get('http://localhost:3000/contest')
+                    const response = await axios.get('http://localhost:3000/contest',{
+                        headers : {
+                            Authorization : token
+                        }
+                    })
         
                     if(response){
                         setPreviousContest(response.data.previousContest)
@@ -66,6 +73,8 @@ export default function PastContest(){
                     contest_id = { contest.contest_id }
                     contest_name = { contest.contest_name }
                     contest_time = {contest.contest_time}
+                    bookmarked = {contest.bookmarked}
+                    video = {contest.video}
                  />
             ))}
         </div>)

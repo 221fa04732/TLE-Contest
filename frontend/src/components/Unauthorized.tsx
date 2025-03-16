@@ -1,8 +1,8 @@
-import SignupPage from "../pages/Signup"
+import SigninPage from "../pages/Signin"
 
 export default function Unauthorized(props : any){
     
     const token : string | null = localStorage.getItem("tle-token")
 
-    return token ? props.children : <SignupPage />
+    return token ? props.children : <SigninPage />
 }

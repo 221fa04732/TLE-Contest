@@ -11,17 +11,23 @@ export default function FutureContest(){
         contest_name : string
         contest_duration : string
         contest_time : string
+        bookmarked : boolean
     }
 
     const [upcommingContest, setUpcommingContest] = useState<futureContest[]>([])
     const [filterUpcommingContest, setFilterUpcommingContest] = useState<futureContest[]>([])
     const [typedWord, setTypedword] = useState("")
     const search = DebounceHook(typedWord)
+    const token = localStorage.getItem("tle-token")
 
     useEffect(()=>{
 
         const upcommingData = async()=>{
-            const response = await axios.get('http://localhost:3000/contest')
+            const response = await axios.get('http://localhost:3000/contest',{
+                headers : {
+                    Authorization : token
+                }
+            })
 
             if(response){
                 setUpcommingContest(response.data.upcomminingContest)
@@ -67,6 +73,7 @@ export default function FutureContest(){
             contest_name = { contest.contest_name }
             contest_duration = { contest.contest_duration }
             contest_time = { contest.contest_time } 
+            bookmarked = {contest.bookmarked}
              />
         ))}
     </div>)

@@ -2,7 +2,6 @@ import express from 'express'
 import  { JwtPayload, verify } from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client';
 
-
 const app = express()
 const prisma = new PrismaClient();
 app.use(express.json())
@@ -25,6 +24,7 @@ const authMiddleware = async (req : any, res : any, next : any) => {
                 }
             })
             if(user){
+                req.userInfo = { userId : user.id, userType : user.userType }
                 next();
                 return;
             }

@@ -35,6 +35,7 @@ const authMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
                 }
             });
             if (user) {
+                req.userInfo = { userId: user.id, userType: user.userType };
                 next();
                 return;
             }

@@ -2,12 +2,13 @@ import express from 'express'
 import cors from 'cors'
 import axios from 'axios'
 import { PrismaClient } from '@prisma/client';
-import { sign, verify } from 'jsonwebtoken'
+import { sign } from 'jsonwebtoken'
 import authMiddleware from './auth';
 
 const app = express();
 app.use(cors())
 app.use(express.json())
+const prisma = new PrismaClient()
 
 
 type upcomminingContest = {
@@ -16,6 +17,7 @@ type upcomminingContest = {
     contest_name : string
     contest_duration : string
     contest_time : string
+    bookmarked : boolean
 }
 
 type previousContest = {
@@ -23,15 +25,26 @@ type previousContest = {
     contest_id : string
     contest_name : string
     contest_time : string
+    bookmarked : boolean
+    video : string
 }
-
 
 
 app.get('/contest', authMiddleware, async(req : any, res : any)=>{
 
+    const { userId } = req.userInfo;
+
     const codechefContest = await axios.get('https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all')
 
     const codeforcesContest = await axios.get("https://codeforces.com/api/contest.list")
+
+    const bookmark = await prisma.bookmark.findMany({
+        where : {
+            userId : userId
+        }
+    })
+
+    const videoURL = await prisma.video.findMany({})
 
     let previousContest : previousContest[] = []
     let upcomminingContest : upcomminingContest[] =[]
@@ -49,7 +62,8 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true
-            })
+            }),
+            bookmarked : bookmark.some(item => item.contestId === contest.contest_code)
         })
     })
 
@@ -65,7 +79,9 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true
-            })
+            }),
+            bookmarked : bookmark.some(item => item.contestId === contest.contest_code),
+            video : (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
         })
     })
 
@@ -73,9 +89,9 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
         if(contest.phase === "BEFORE"){
             upcomminingContest.push({
                 contest_type : "codeforces",
-                contest_id : contest.id,
+                contest_id : contest.id.toString(),
                 contest_name : contest.name,
-                contest_duration : contest.durationSeconds,
+                contest_duration : contest.durationSeconds.toString(),
                 contest_time : new Date(contest.startTimeSeconds*1000).toLocaleString("en-IN",{
                     day: "2-digit",
                     month: "short",
@@ -83,14 +99,15 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: true
-                })
+                }),
+                bookmarked : bookmark.some(item => item.contestId === contest.id.toString())
             })
         }
 
         else if(contest.phase === "FINISHED"){
             previousContest.push({
                 contest_type : "codeforces",
-                contest_id : contest.id,
+                contest_id : contest.id.toString(),
                 contest_name : contest.name,
                 contest_time : new Date(contest.startTimeSeconds*1000).toLocaleString("en-IN",{
                     day: "2-digit",
@@ -99,7 +116,9 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: true
-                })
+                }),
+                bookmarked : bookmark.some(item => item.contestId === contest.id.toString()),
+                video : (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
             })
         }
     })
@@ -118,7 +137,6 @@ app.post('/signup', async(req : any, res : any)=> {
 
     const {email, password } = req.body
     try{
-        const prisma =new PrismaClient();
         const user = await prisma.user.findFirst({
             where : {
                 name : email
@@ -143,6 +161,7 @@ app.post('/signup', async(req : any, res : any)=> {
 
         res.status(200).json({
             message : "signin sucessful",
+            userType : "student",
             token
         })
     }
@@ -159,8 +178,6 @@ app.post('/signin', async(req : any, res : any)=>{
     const {email, password, userType} = req.body;
 
     try{
-        const prisma =new PrismaClient();
-
         const user = await prisma.user.findFirst({
             where : {
                 name : email,
@@ -189,6 +206,85 @@ app.post('/signin', async(req : any, res : any)=>{
         })
     }
 })
+
+
+app.post('/bookmark', authMiddleware, async(req : any, res : any) => {
+
+    const { userId } = req.userInfo
+    const { contestId } = req.body
+
+    try{
+        const bookmark = await prisma.bookmark.findFirst({
+            where : {
+                userId : userId,
+                contestId : contestId
+            }
+        })
+
+        if(bookmark) {
+            await prisma.bookmark.delete({
+                where : {
+                    id : bookmark.id
+                }
+            })
+
+            res.status(200).json({
+                Message : "contest unmark"
+            })
+            return;
+        }
+
+        await prisma.bookmark.create({
+            data : {
+                userId : userId,
+                contestId : contestId
+            }
+        })
+
+        res.status(200).json({
+            Message : "contest mark"
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "server error"
+        })
+    }
+
+})
+
+
+app.post('/video', authMiddleware, async(req : any, res : any) => {
+
+    const { userType } = req.userInfo
+    const { contestId, videoURL } = req.body
+
+    if(userType !== "admin"){
+        res.status(401).json({ 
+            message: "You can't add" 
+        });
+        return;
+    }
+
+    try{
+        await prisma.video.create({
+            data : {
+                videoURL : videoURL,
+                contestId : contestId
+            }
+        })
+
+        res.status(200).json({
+            Message : "video added"
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "server error"
+        })
+    }
+})
+
 
 app.listen(3000, ()=>{
     console.log('server is listining')

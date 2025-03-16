@@ -21,9 +21,17 @@ const auth_1 = __importDefault(require("./auth"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+const prisma = new client_1.PrismaClient();
 app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.userInfo;
     const codechefContest = yield axios_1.default.get('https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all');
     const codeforcesContest = yield axios_1.default.get("https://codeforces.com/api/contest.list");
+    const bookmark = yield prisma.bookmark.findMany({
+        where: {
+            userId: userId
+        }
+    });
+    const videoURL = yield prisma.video.findMany({});
     let previousContest = [];
     let upcomminingContest = [];
     codechefContest.data.future_contests.map((contest) => {
@@ -39,7 +47,8 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true
-            })
+            }),
+            bookmarked: bookmark.some(item => item.contestId === contest.contest_code)
         });
     });
     codechefContest.data.past_contests.map((contest) => {
@@ -54,16 +63,18 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true
-            })
+            }),
+            bookmarked: bookmark.some(item => item.contestId === contest.contest_code),
+            video: (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
         });
     });
     codeforcesContest.data.result.map((contest) => {
         if (contest.phase === "BEFORE") {
             upcomminingContest.push({
                 contest_type: "codeforces",
-                contest_id: contest.id,
+                contest_id: contest.id.toString(),
                 contest_name: contest.name,
-                contest_duration: contest.durationSeconds,
+                contest_duration: contest.durationSeconds.toString(),
                 contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
                     day: "2-digit",
                     month: "short",
@@ -71,13 +82,14 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: true
-                })
+                }),
+                bookmarked: bookmark.some(item => item.contestId === contest.id.toString())
             });
         }
         else if (contest.phase === "FINISHED") {
             previousContest.push({
                 contest_type: "codeforces",
-                contest_id: contest.id,
+                contest_id: contest.id.toString(),
                 contest_name: contest.name,
                 contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
                     day: "2-digit",
@@ -86,7 +98,9 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: true
-                })
+                }),
+                bookmarked: bookmark.some(item => item.contestId === contest.id.toString()),
+                video: (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
             });
         }
     });
@@ -98,7 +112,6 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
 app.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     try {
-        const prisma = new client_1.PrismaClient();
         const user = yield prisma.user.findFirst({
             where: {
                 name: email
@@ -119,6 +132,7 @@ app.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const token = (0, jsonwebtoken_1.sign)({ email }, "secret");
         res.status(200).json({
             message: "signin sucessful",
+            userType: "student",
             token
         });
     }
@@ -131,7 +145,6 @@ app.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 app.post('/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, userType } = req.body;
     try {
-        const prisma = new client_1.PrismaClient();
         const user = yield prisma.user.findFirst({
             where: {
                 name: email,
@@ -153,6 +166,69 @@ app.post('/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
     catch (e) {
         req.status(404).json({
+            message: "server error"
+        });
+    }
+}));
+app.post('/bookmark', auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.userInfo;
+    const { contestId } = req.body;
+    try {
+        const bookmark = yield prisma.bookmark.findFirst({
+            where: {
+                userId: userId,
+                contestId: contestId
+            }
+        });
+        if (bookmark) {
+            yield prisma.bookmark.delete({
+                where: {
+                    id: bookmark.id
+                }
+            });
+            res.status(200).json({
+                Message: "contest unmark"
+            });
+            return;
+        }
+        yield prisma.bookmark.create({
+            data: {
+                userId: userId,
+                contestId: contestId
+            }
+        });
+        res.status(200).json({
+            Message: "contest mark"
+        });
+    }
+    catch (e) {
+        res.status(404).json({
+            message: "server error"
+        });
+    }
+}));
+app.post('/video', auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userType } = req.userInfo;
+    const { contestId, videoURL } = req.body;
+    if (userType !== "admin") {
+        res.status(401).json({
+            message: "You can't add"
+        });
+        return;
+    }
+    try {
+        yield prisma.video.create({
+            data: {
+                videoURL: videoURL,
+                contestId: contestId
+            }
+        });
+        res.status(200).json({
+            Message: "video added"
+        });
+    }
+    catch (e) {
+        res.status(404).json({
             message: "server error"
         });
     }
