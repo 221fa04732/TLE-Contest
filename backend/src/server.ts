@@ -17,6 +17,7 @@ type upcomminingContest = {
     contest_name : string
     contest_duration : string
     contest_time : string
+    contest_status? : String
     bookmarked : boolean
 }
 
@@ -25,6 +26,7 @@ type previousContest = {
     contest_id : string
     contest_name : string
     contest_time : string
+    contest_status? : String
     bookmarked : boolean
     video : string
 }
@@ -35,7 +37,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
     const { userId } = req.userInfo;
     const dataType = req.query.type;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 20;
     const search = req.query.search || ""
     const skip = (page - 1) * limit;
 
@@ -188,6 +190,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status : "future",
                         bookmarked: true
                     });
                 }
@@ -208,6 +211,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status : "future",
                         bookmarked : true
                     })
                 }
@@ -227,6 +231,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status : "past",
                         bookmarked : true,
                         video : (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
                     })
@@ -247,6 +252,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status : "past",
                         bookmarked : true,
                         video : (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
                     })

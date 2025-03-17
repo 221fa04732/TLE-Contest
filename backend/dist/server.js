@@ -26,8 +26,8 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
     const { userId } = req.userInfo;
     const dataType = req.query.type;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || "none";
+    const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search || "";
     const skip = (page - 1) * limit;
     try {
         const codechefContest = yield axios_1.default.get('https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all');
@@ -79,7 +79,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                     });
                 }
             });
-            if (search !== 'none') {
+            if (search !== "") {
                 upcomminingContest = upcomminingContest.filter((contest) => String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) ||
                     contest.contest_type.toLowerCase().includes(search.toLowerCase()) ||
                     contest.contest_name.toLowerCase().includes(search.toLowerCase()));
@@ -126,7 +126,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                     });
                 }
             });
-            if (search !== 'none') {
+            if (search !== "") {
                 previousContest = previousContest.filter((contest) => String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) ||
                     contest.contest_type.toLowerCase().includes(search.toLowerCase()) ||
                     contest.contest_name.toLowerCase().includes(search.toLowerCase()));
@@ -152,6 +152,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status: "future",
                         bookmarked: true
                     });
                 }
@@ -171,6 +172,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status: "future",
                         bookmarked: true
                     });
                 }
@@ -189,6 +191,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status: "past",
                         bookmarked: true,
                         video: (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
                     });
@@ -208,6 +211,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                             minute: "2-digit",
                             hour12: true
                         }),
+                        contest_status: "past",
                         bookmarked: true,
                         video: (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
                     });

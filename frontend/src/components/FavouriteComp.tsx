@@ -8,42 +8,42 @@ import { useRecoilState } from "recoil"
 
 export default function FavouriteContest(){
 
-    type futureContest = {
-        contest_type : string
-        contest_id : string
-        contest_name : string
-        contest_duration : string
-        contest_time : string
-        bookmarked : boolean
-    }
+    window.scroll({
+        top : 0,
+        behavior : "smooth"
+    })
 
-    type pastContest = {
+    type bookmarkContest = {
         contest_type : string
         contest_id : string
         contest_name : string
         contest_time : string
-        bookmarked : boolean
+        contest_duration : string 
+        contest_status : string
         video : string
+        bookmarked : boolean
     }
 
-    const [upcommingContest, setUpcommingContest] = useState<futureContest[]>([])
-    const [previousContest, setPreviousContest] = useState<pastContest[]>([])
+    const [bookmarkContest, setBookmarkContest] = useState<bookmarkContest[]>([])
     const token = localStorage.getItem("tle-token")
     const [bookmarkLoader, setBookmarkloader] = useRecoilState(BookmarkLoader)
+    const limit = 20;
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasmore] = useState(true)
 
     useEffect(()=>{
         setBookmarkloader(true)
         const upcommingData = async()=>{
             try{
-                const response = await axios.get('http://localhost:3000/contest',{
+                const response = await axios.get(`http://localhost:3000/contest?type=bookmarked&limit=${limit}&page=${page}`,{
                     headers : {
                         Authorization : token
                     }
                 })
     
                 if(response){
-                    setUpcommingContest(response.data.upcomminingContest)
-                    setPreviousContest(response.data.previousContest)
+                    setBookmarkContest(response.data.allBookmark)
+                    setHasmore(response.data.hasMore)
                 }
             }
             catch(e){
@@ -59,35 +59,46 @@ export default function FavouriteContest(){
         const timer = setInterval(upcommingData, 60000)
 
         return ()=> clearInterval(timer)
-    }, [])
+    }, [page])
 
+    return(<div className="flex flex-col">
 
-    if(bookmarkLoader){
-        return(<Loader />)
-    }
+        <div>
+            {bookmarkLoader ? <Loader /> : 
+                bookmarkContest.map((contest)=>(
+                    contest.contest_status === "future" ? 
+                    (<FututreContestCard key={contest.contest_id+contest.contest_name}
+                        contest_type = { contest.contest_type }
+                        contest_id = { contest.contest_id }
+                        contest_name = { contest.contest_name }
+                        contest_duration = { contest.contest_duration }
+                        contest_time = { contest.contest_time } 
+                        bookmarked = {contest.bookmarked}
+                    />) : 
+                    (<PastContestCard key={contest.contest_id+contest.contest_name}
+                        contest_type = { contest.contest_type }
+                        contest_id = { contest.contest_id }
+                        contest_name = { contest.contest_name }
+                        contest_time = {contest.contest_time}
+                        bookmarked = {contest.bookmarked}
+                        video = {contest.video}
+                    />)
+                ))
+            }
+        </div>
 
-    return(<div className="pt-6">
+        <div className="flex justify-end gap-2 mt-6">
 
-        {upcommingContest.map((contest)=>(
-            contest.bookmarked && <FututreContestCard key={contest.contest_id+contest.contest_name}
-            contest_type = { contest.contest_type }
-            contest_id = { contest.contest_id }
-            contest_name = { contest.contest_name }
-            contest_duration = { contest.contest_duration }
-            contest_time = { contest.contest_time } 
-            bookmarked = {contest.bookmarked}
-             />
-        ))}
+            {page > 1 && <button 
+                className="bg-red-400 px-2 py-1 text-white rounded-sm flex justify-center cursor-pointer"
+                onClick={() => setPage(page - 1)}>⬅ Previous page
+            </button>}
 
-        {previousContest.map((contest)=>(
-            contest.bookmarked && <PastContestCard key={contest.contest_id+contest.contest_name}
-                contest_type = { contest.contest_type }
-                contest_id = { contest.contest_id }
-                contest_name = { contest.contest_name }
-                contest_time = {contest.contest_time}
-                bookmarked = {contest.bookmarked}
-                video = {contest.video}
-                />
-        ))}
+            {hasMore && <button 
+                className="bg-green-400 px-2 py-1 text-white rounded-sm flex justify-center cursor-pointer"
+                onClick={() => setPage(page + 1)}>Next Page ➡
+            </button>}
+        </div>
+
     </div>)
 }
