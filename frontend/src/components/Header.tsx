@@ -3,12 +3,14 @@ import { Theamatom } from "../atoms/Theam"
 import { useRecoilState } from "recoil"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { HamburgerAtom } from "../atoms/HamburgerAtom"
 
 export default function Header(){
 
     const [theam, setTheam] = useRecoilState(Theamatom)
     const [login, setLogin] = useState(false)
     const token = localStorage.getItem("tle-token")
+    const [hamburger, setHamburger] = useRecoilState(HamburgerAtom)
     const navigate = useNavigate();
 
     useEffect(()=>{
@@ -20,14 +22,16 @@ export default function Header(){
     return(<div className="flex justify-between items-center min-h-14">
         <div className="flex">
             <img src="./tle.png" className="min-h-8 max-h-8 min-w-8 max-w-8" />
-            <div className="text-xl font-bold pl-1">TLE Contest</div>
+            <div className="text-xl font-bold pl-1 hidden md:block ">TLE Contest</div>
         </div>
 
-        <div className="flex gap-6 text-lg">
-            <Link to={'/home'}>Home</Link>
-            <Link to={'/upcommingContest'}>Upcomming</Link>
-            <Link to={'/previousContest'}>Previous</Link>
-            <Link to={'/favourite'}>Bookmark</Link>
+        <div className="text-lg hidden sm:block">
+            <div className="flex gap-6">
+                <Link to={'/home'}>Home</Link>
+                <Link to={'/upcommingContest'}>Upcomming</Link>
+                <Link to={'/previousContest'}>Previous</Link>
+                <Link to={'/favourite'}>Bookmark</Link>
+            </div> 
         </div>
 
         <div className="flex items-center justify-center">
@@ -51,6 +55,15 @@ export default function Header(){
                     navigate('/signin')
                 }}>SignIn</button>
             }</div>
+
+            <div className="ml-2 block sm:hidden">
+                <button 
+                    className="cursor-pointer flex justify-center items-center"
+                    onClick={()=>{
+                        setHamburger(!hamburger)
+                    }}><img src={hamburger ? "./remove.png" : "./hamburger.png"} className="max-h-8 max-w-8"/>
+                </button>
+            </div>
             
         </div>
     </div>)

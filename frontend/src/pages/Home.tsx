@@ -16,7 +16,7 @@ export default function HomePage(){
             </div>
         </div>
 
-        <div className="w-11/12 mt-14">
+        <div className="w-11/12 mt-14 min-h-screen">
             <Landing />
         </div>
 

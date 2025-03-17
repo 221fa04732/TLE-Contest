@@ -14,16 +14,21 @@ import SignupPage from "./pages/Signup"
 import SigninPage from "./pages/Signin"
 import Loader from "./components/Loader"
 import { Theamatom } from "./atoms/Theam"
+import Hamburger from "./components/Hamburger"
+import { HamburgerAtom } from "./atoms/HamburgerAtom"
 
 
 function App() {
 
   const theam = useRecoilValue(Theamatom)
+  const hamburger = useRecoilValue(HamburgerAtom)
 
   return (<div className={`${theam === 'dark' ? 'bg-stone-800 text-gray-400' : 'bg-white text-black'} min-h-screen`}>
     
+    <div className={`fixed z-50 ${hamburger ? "block sm:hidden" : "hidden"} right-2 top-16`}>
+      <Hamburger />
+    </div>
     <Suspense fallback={<Loader />} >
-
       <Routes>
 
         <Route index element={<HomePage />} />

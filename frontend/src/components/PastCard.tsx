@@ -38,9 +38,9 @@ export default function PastContestCard(props : pastContest){
         </div>
         <div>{props.contest_time}</div>
         <div>Contest ended</div>
-        <div className="flex justify-end gap-4">
-            <a href={contestURL} target="_blank" className="bg-blue-700 px-2 py-1 text-white rounded-sm">Go to Contest</a>
-            {props.video === "" ? (userType === "admin" ? <PostVideo contestId={props.contest_id} /> : null) : <a href={props.video} target="_blank" className="bg-blue-700 px-2 py-1 text-white rounded-sm">Video Solution</a>}
+        <div className="flex justify-end gap-4 flex-col sm:flex-row">
+            <a href={contestURL} target="_blank" className="bg-blue-700 px-2 py-1 text-white rounded-sm flex justify-center">Go to Contest</a>
+            {props.video === "" ? (userType === "admin" ? <PostVideo contestId={props.contest_id} /> : null) : <a href={props.video} target="_blank" className="bg-blue-700 px-2 py-1 text-white rounded-sm flex justify-center">Video Solution</a>}
         </div>
     </div>)
 }
