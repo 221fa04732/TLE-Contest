@@ -3,7 +3,9 @@ import axios from 'axios'
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { SignLoader } from "../atoms/SignLoader"
-import { useRecoilState } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
+import PasswordVisibleHide from "../components/PassHideVisible"
+import { PasswordVisible } from "../atoms/PasswordVisible"
 
 export default function SignupPage(){
 
@@ -11,6 +13,7 @@ export default function SignupPage(){
     const [password, setPassword] = useState("")
     const navigate = useNavigate();
     const [signLoader, setSignloader] = useRecoilState(SignLoader)
+    const visible = useRecoilValue(PasswordVisible)
 
     async function handleSignUp(){
 
@@ -48,15 +51,17 @@ export default function SignupPage(){
               }}
             />
       
-            <label>Password</label>
-            <input
-              type="password"
-              className="outline-none border border-white pl-2 min-h-8 min-w-80 mb-2"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-            />
+            <label htmlFor="">Password</label>
+            <div className="flex items-center border border-white mb-3">
+                <input type={visible ? "text" : "password"} 
+                    className="outline-none pl-2 min-h-8 min-w-80"
+                    value={password}
+                    onChange={(e)=>{
+                        setPassword(e.target.value)
+                    }
+                }/>
+                <PasswordVisibleHide />
+            </div>
 
             <div className="pb-3">
                 already have account ? <Link to={'/signin'} className="text-red-500">Sign In</Link>

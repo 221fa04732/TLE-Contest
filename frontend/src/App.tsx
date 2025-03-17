@@ -16,6 +16,7 @@ import Loader from "./components/Loader"
 import { Theamatom } from "./atoms/Theam"
 import Hamburger from "./components/Hamburger"
 import { HamburgerAtom } from "./atoms/HamburgerAtom"
+import ScrollToTop from "./components/ScrollTop"
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
     <div className={`fixed z-50 ${hamburger ? "block sm:hidden" : "hidden"} right-2 top-16`}>
       <Hamburger />
     </div>
+    <ScrollToTop />
     <Suspense fallback={<Loader />} >
       <Routes>
 

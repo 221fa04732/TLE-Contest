@@ -3,7 +3,9 @@ import axios from 'axios'
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { SignLoader } from "../atoms/SignLoader"
-import { useRecoilState } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
+import PasswordVisibleHide from "../components/PassHideVisible"
+import { PasswordVisible } from "../atoms/PasswordVisible"
 
 export default function SigninPage(){
 
@@ -12,6 +14,7 @@ export default function SigninPage(){
     const [userType, setUserType] = useState(false)
     const navigate = useNavigate();
     const [signLoader, setSignloader] = useRecoilState(SignLoader)
+    const visible = useRecoilValue(PasswordVisible)
 
     async function handleSignIn(){
 
@@ -50,13 +53,16 @@ export default function SigninPage(){
             }/>
 
             <label htmlFor="">Password</label>
-            <input type="password" 
-                className="outline-none border border-white pl-2 min-h-8 min-w-80 mb-2"
-                value={password}
-                onChange={(e)=>{
-                    setPassword(e.target.value)
-                }
-            }/>
+            <div className="flex items-center border border-white mb-3">
+                <input type={visible ? "text" : "password"} 
+                    className="outline-none pl-2 min-h-8 min-w-80"
+                    value={password}
+                    onChange={(e)=>{
+                        setPassword(e.target.value)
+                    }
+                }/>
+                <PasswordVisibleHide />
+            </div>
 
             <div className="flex mb-4">
                 <input type="checkbox" 
