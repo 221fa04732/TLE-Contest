@@ -36,7 +36,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
     const dataType = req.query.type;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || "none"
+    const search = req.query.search || ""
     const skip = (page - 1) * limit;
 
     try{
@@ -99,7 +99,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                 }
             })
 
-            if(search !== 'none'){
+            if(search !== ""){
                 upcomminingContest = upcomminingContest.filter((contest: any) =>
                     String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) || 
                     contest.contest_type.toLowerCase().includes(search.toLowerCase()) ||
@@ -155,7 +155,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                 }
             })
 
-            if(search !== 'none'){
+            if(search !== ""){
                 previousContest = previousContest.filter((contest: any) =>
                     String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) || 
                     contest.contest_type.toLowerCase().includes(search.toLowerCase()) ||
