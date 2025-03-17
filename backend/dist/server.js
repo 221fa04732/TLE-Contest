@@ -24,90 +24,201 @@ app.use(express_1.default.json());
 const prisma = new client_1.PrismaClient();
 app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.userInfo;
-    const codechefContest = yield axios_1.default.get('https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all');
-    const codeforcesContest = yield axios_1.default.get("https://codeforces.com/api/contest.list");
-    const bookmark = yield prisma.bookmark.findMany({
-        where: {
-            userId: userId
-        }
-    });
-    const videoURL = yield prisma.video.findMany({});
-    let previousContest = [];
-    let upcomminingContest = [];
-    codechefContest.data.future_contests.map((contest) => {
-        upcomminingContest.push({
-            contest_type: "codechef",
-            contest_id: contest.contest_code,
-            contest_name: contest.contest_name,
-            contest_duration: contest.contest_duration,
-            contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true
-            }),
-            bookmarked: bookmark.some(item => item.contestId === contest.contest_code)
+    const dataType = req.query.type;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    try {
+        const codechefContest = yield axios_1.default.get('https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all');
+        const codeforcesContest = yield axios_1.default.get("https://codeforces.com/api/contest.list");
+        const bookmark = yield prisma.bookmark.findMany({
+            where: {
+                userId: userId
+            }
         });
-    });
-    codechefContest.data.past_contests.map((contest) => {
-        previousContest.push({
-            contest_type: "codechef",
-            contest_id: contest.contest_code,
-            contest_name: contest.contest_name,
-            contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true
-            }),
-            bookmarked: bookmark.some(item => item.contestId === contest.contest_code),
-            video: (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
-        });
-    });
-    codeforcesContest.data.result.map((contest) => {
-        if (contest.phase === "BEFORE") {
-            upcomminingContest.push({
-                contest_type: "codeforces",
-                contest_id: contest.id.toString(),
-                contest_name: contest.name,
-                contest_duration: contest.durationSeconds.toString(),
-                contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true
-                }),
-                bookmarked: bookmark.some(item => item.contestId === contest.id.toString())
+        const videoURL = yield prisma.video.findMany({});
+        let upcomminingContest = [];
+        let previousContest = [];
+        let bookmarkedupcomminingContest = [];
+        let bookmarkedpreviousContest = [];
+        if (dataType === "future") {
+            codechefContest.data.future_contests.map((contest) => {
+                upcomminingContest.push({
+                    contest_type: "codechef",
+                    contest_id: contest.contest_code,
+                    contest_name: contest.contest_name,
+                    contest_duration: contest.contest_duration,
+                    contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true
+                    }),
+                    bookmarked: bookmark.some(item => item.contestId === contest.contest_code)
+                });
+            });
+            codeforcesContest.data.result.map((contest) => {
+                if (contest.phase === "BEFORE") {
+                    upcomminingContest.push({
+                        contest_type: "codeforces",
+                        contest_id: contest.id.toString(),
+                        contest_name: contest.name,
+                        contest_duration: contest.durationSeconds.toString(),
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        }),
+                        bookmarked: bookmark.some(item => item.contestId === contest.id.toString())
+                    });
+                }
+            });
+            return res.status(200).json({
+                upcomminingContest: upcomminingContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime()).slice(skip, skip + limit),
+                hasMore: skip + limit < upcomminingContest.length
             });
         }
-        else if (contest.phase === "FINISHED") {
-            previousContest.push({
-                contest_type: "codeforces",
-                contest_id: contest.id.toString(),
-                contest_name: contest.name,
-                contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true
-                }),
-                bookmarked: bookmark.some(item => item.contestId === contest.id.toString()),
-                video: (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
+        else if (dataType === "past") {
+            codechefContest.data.past_contests.map((contest) => {
+                previousContest.push({
+                    contest_type: "codechef",
+                    contest_id: contest.contest_code,
+                    contest_name: contest.contest_name,
+                    contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true
+                    }),
+                    bookmarked: bookmark.some(item => item.contestId === contest.contest_code),
+                    video: (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
+                });
+            });
+            codeforcesContest.data.result.map((contest) => {
+                if (contest.phase === "FINISHED") {
+                    previousContest.push({
+                        contest_type: "codeforces",
+                        contest_id: contest.id.toString(),
+                        contest_name: contest.name,
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        }),
+                        bookmarked: bookmark.some(item => item.contestId === contest.id.toString()),
+                        video: (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
+                    });
+                }
+            });
+            return res.status(200).json({
+                previousContest: previousContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime()).reverse().slice(skip, skip + limit),
+                hasMore: skip + limit < previousContest.length
             });
         }
-    });
-    res.status(200).json({
-        upcomminingContest: upcomminingContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime()),
-        previousContest: previousContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime()).reverse()
-    });
+        else if (dataType === "bookmarked") {
+            codechefContest.data.future_contests.forEach((contest) => {
+                if (bookmark.some(item => item.contestId === contest.contest_code)) {
+                    bookmarkedupcomminingContest.push({
+                        contest_type: "codechef",
+                        contest_id: contest.contest_code,
+                        contest_name: contest.contest_name,
+                        contest_duration: contest.contest_duration,
+                        contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        }),
+                        bookmarked: true
+                    });
+                }
+            });
+            codeforcesContest.data.result.forEach((contest) => {
+                if (contest.phase === "BEFORE" && bookmark.some(item => item.contestId === contest.id.toString())) {
+                    bookmarkedupcomminingContest.push({
+                        contest_type: "codeforces",
+                        contest_id: contest.id.toString(),
+                        contest_name: contest.name,
+                        contest_duration: contest.durationSeconds.toString(),
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        }),
+                        bookmarked: true
+                    });
+                }
+            });
+            codechefContest.data.past_contests.forEach((contest) => {
+                if (bookmark.some(item => item.contestId === contest.contest_code)) {
+                    bookmarkedpreviousContest.push({
+                        contest_type: "codechef",
+                        contest_id: contest.contest_code,
+                        contest_name: contest.contest_name,
+                        contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        }),
+                        bookmarked: true,
+                        video: (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
+                    });
+                }
+            });
+            codeforcesContest.data.result.forEach((contest) => {
+                if (contest.phase === "FINISHED" && bookmark.some(item => item.contestId === contest.id.toString())) {
+                    bookmarkedpreviousContest.push({
+                        contest_type: "codeforces",
+                        contest_id: contest.id.toString(),
+                        contest_name: contest.name,
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        }),
+                        bookmarked: true,
+                        video: (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
+                    });
+                }
+            });
+            bookmarkedupcomminingContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime());
+            bookmarkedpreviousContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime()).reverse();
+            const allBookmark = [...bookmarkedupcomminingContest, ...bookmarkedpreviousContest];
+            return res.status(200).json({
+                allBookmark: allBookmark.slice(skip, skip + limit),
+                hasMore: skip + limit < allBookmark.length,
+            });
+        }
+        return res.status(400).json({
+            message: "can't fetch the data"
+        });
+    }
+    catch (e) {
+        res.status(404).json({
+            message: "server error"
+        });
+    }
 }));
 app.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
