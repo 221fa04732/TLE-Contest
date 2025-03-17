@@ -2,6 +2,7 @@ import Header from "../components/Header"
 import Landing from "../components/Landing"
 import { Theamatom } from "../atoms/Theam"
 import { useRecoilValue } from "recoil"
+import Footer from "../components/Footer"
 
 export default function HomePage(){
 
@@ -17,6 +18,10 @@ export default function HomePage(){
 
         <div className="w-11/12 mt-14">
             <Landing />
+        </div>
+
+        <div className="mt-6">
+            <Footer />
         </div>
 
     </div>)

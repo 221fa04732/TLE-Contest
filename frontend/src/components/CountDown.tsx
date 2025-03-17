@@ -56,7 +56,7 @@ const CountdownTimer: React.FC<CountdownProps> = ({ targetDate }) => {
   }, [targetDate]);
 
   return (
-    <div className="text-center text-lg font-bold">
+    <div className="text-center text-lg font-medium text-red-500">
       {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
     </div>
   );

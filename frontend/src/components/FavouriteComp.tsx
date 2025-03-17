@@ -2,6 +2,9 @@ import { useEffect, useState } from "react"
 import axios from 'axios'
 import FututreContestCard from "./FutureCard"
 import PastContestCard from "./PastCard"
+import { BookmarkLoader } from "../atoms/BookmarkLoader"
+import Loader from "./Loader"
+import { useRecoilState } from "recoil"
 
 export default function FavouriteContest(){
 
@@ -26,19 +29,28 @@ export default function FavouriteContest(){
     const [upcommingContest, setUpcommingContest] = useState<futureContest[]>([])
     const [previousContest, setPreviousContest] = useState<pastContest[]>([])
     const token = localStorage.getItem("tle-token")
+    const [bookmarkLoader, setBookmarkloader] = useRecoilState(BookmarkLoader)
 
     useEffect(()=>{
-
+        setBookmarkloader(true)
         const upcommingData = async()=>{
-            const response = await axios.get('http://localhost:3000/contest',{
-                headers : {
-                    Authorization : token
+            try{
+                const response = await axios.get('http://localhost:3000/contest',{
+                    headers : {
+                        Authorization : token
+                    }
+                })
+    
+                if(response){
+                    setUpcommingContest(response.data.upcomminingContest)
+                    setPreviousContest(response.data.previousContest)
                 }
-            })
-
-            if(response){
-                setUpcommingContest(response.data.upcomminingContest)
-                setPreviousContest(response.data.previousContest)
+            }
+            catch(e){
+                console.log('server error')
+            }
+            finally{
+                setBookmarkloader(false)
             }
         }
 
@@ -49,6 +61,10 @@ export default function FavouriteContest(){
         return ()=> clearInterval(timer)
     }, [])
 
+
+    if(bookmarkLoader){
+        return(<Loader />)
+    }
 
     return(<div className="pt-6">
 

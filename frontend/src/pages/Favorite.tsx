@@ -2,6 +2,7 @@ import FavouriteContest from "../components/FavouriteComp"
 import Header from "../components/Header"
 import { Theamatom } from "../atoms/Theam"
 import { useRecoilValue } from "recoil"
+import Footer from "../components/Footer"
 
 
 export default function FavouritePage(){
@@ -16,8 +17,12 @@ export default function FavouritePage(){
             </div>
         </div>
 
-        <div className="w-11/12 mt-14">
+        <div className="w-11/12 mt-14 min-h-screen">
             <FavouriteContest />
+        </div>
+
+        <div className="mt-6">
+            <Footer />
         </div>
 
     </div>)

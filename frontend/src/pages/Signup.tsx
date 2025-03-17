@@ -1,14 +1,20 @@
 import { useState } from "react"
 import axios from 'axios'
 import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
+import { SignLoader } from "../atoms/SignLoader"
+import { useRecoilState } from "recoil"
 
 export default function SignupPage(){
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const navigate = useNavigate();
+    const [signLoader, setSignloader] = useRecoilState(SignLoader)
 
     async function handleSignUp(){
+
+        setSignloader(true)
         try{
             const response = await axios.post('http://localhost:3000/signup',{
                 email : email,
@@ -24,27 +30,49 @@ export default function SignupPage(){
         catch(e){
             console.log("server error")
         }
+        setSignloader(false)
     }
 
-    return(<div>
-        <div>
-            <input type="text"
-                value={email}
-                onChange={(e)=>{
-                    setEmail(e.target.value)
-                }
-            }/>
+    return (
+        <div className="min-h-screen w-full flex justify-center items-center">
+          <div className="flex flex-col p-6 border border-white">
+            <div className="flex justify-center text-2xl mb-4">SignUp</div>
+      
+            <label>Email</label>
+            <input
+              type="text"
+              className="outline-none border border-white pl-2 min-h-8 min-w-80 mb-3"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+            />
+      
+            <label>Password</label>
+            <input
+              type="password"
+              className="outline-none border border-white pl-2 min-h-8 min-w-80 mb-2"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
 
-            <input type="password" 
-                value={password}
-                onChange={(e)=>{
-                    setPassword(e.target.value)
-                }
-            }/>
-
-            <button onClick={()=>{
-                handleSignUp()
-            }}>Sign Up</button>
+            <div className="pb-3">
+                already have account ? <Link to={'/signin'} className="text-red-500">Sign In</Link>
+            </div>
+      
+            {signLoader ?  
+            <button className="bg-blue-700 px-2 py-1 text-white rounded-sm cursor-pointer flex justify-center"><img src="./loading.gif" className="min-h-5 max-w-5" />
+            </button> : 
+            <button
+              className="bg-blue-700 px-2 py-1 text-white rounded-sm cursor-pointer"
+              onClick={() => {
+                handleSignUp();
+              }}>Sign Up
+            </button> }
+          </div>
         </div>
-    </div>)
+      );
+      
 }

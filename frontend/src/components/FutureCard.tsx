@@ -1,5 +1,7 @@
 import CountdownTimer from "./CountDown";
 import BookMarked from "./BookMark";
+import { Theamatom } from "../atoms/Theam";
+import { useRecoilValue } from "recoil";
 
 type futureContest = {
     contest_type : string
@@ -12,6 +14,7 @@ type futureContest = {
 
 export default function FututreContestCard(props : futureContest){
 
+    const theam = useRecoilValue(Theamatom)
     let contestURL = "";
 
     if(props.contest_type === 'codechef'){
@@ -21,17 +24,22 @@ export default function FututreContestCard(props : futureContest){
         contestURL=`https://codeforces.com/contests/${props.contest_id}`
     }
 
-    return(<div className="flex flex-col justify-center items-center p-8 border-2 mt-4">
-        <div>{props.contest_type === "codechef" ? 
-            <img src="./codechef.png" className="min-h-6 max-h-6 min-w-6 max-w-6"/> : 
-            <img src="./codeforces.svg" className="min-h-6 max-h-6 min-w-6 max-w-6"/>}
+    return(<div className="flex flex-col justify-center p-8 border-1 mt-4">
+        <div className="w-full flex justify-between">
+            <div className="flex">
+                <div>{props.contest_type === "codechef" ? 
+                    <img src="./codechef.png" className="min-h-6 max-h-6 min-w-6 max-w-6"/> : 
+                    <img src="./codeforces.svg" className="min-h-6 max-h-6 min-w-6 max-w-6"/>}
+                </div>
+                <div className={`pl-4  text-xl ${theam === 'dark' ? "text-white" : "text-stone-400"}`}>{props.contest_name}</div>
+            </div>
+            <div><BookMarked contestId={props.contest_id} bookmark={props.bookmarked} /></div>
         </div>
-        <div>{props.contest_name}</div>
-        <div>{props.contest_duration}</div>
-        <div>{props.contest_id}</div>
-        <div>{props.contest_time}</div>
-        <a href={contestURL} target="_blank">click</a>
-        <CountdownTimer targetDate={props.contest_time} />
-        <div><BookMarked contestId={props.contest_id} bookmark={props.bookmarked} /></div>
+        <div>Contest Date : {props.contest_time}</div>
+        <div>Contest Duration : {props.contest_duration}</div>
+        <div className="flex justify-between">
+            <CountdownTimer targetDate={props.contest_time} />
+            <a href={contestURL} target="_blank" className="bg-blue-700 px-2 py-1 text-white rounded-sm">Register</a>
+        </div>
     </div>)
 }

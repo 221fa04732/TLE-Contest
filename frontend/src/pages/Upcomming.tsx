@@ -2,6 +2,7 @@ import FutureContest from "../components/Future"
 import Header from "../components/Header"
 import { Theamatom } from "../atoms/Theam"
 import { useRecoilValue } from "recoil"
+import Footer from "../components/Footer"
 
 
 export default function UpcommingPage(){
@@ -16,8 +17,12 @@ export default function UpcommingPage(){
             </div>
         </div>
 
-        <div className="w-11/12 mt-14">
+        <div className="w-11/12 min-h-screen">
             <FutureContest />
+        </div>
+
+        <div className="mt-6">
+            <Footer />
         </div>
 
     </div>)

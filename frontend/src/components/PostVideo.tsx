@@ -1,5 +1,7 @@
 import { useState } from "react"
 import axios from 'axios'
+import { Theamatom } from "../atoms/Theam"
+import { useRecoilValue } from "recoil"
 
 export default function PostVideo(props : {
     contestId : string
@@ -8,6 +10,7 @@ export default function PostVideo(props : {
     const [videoURL, setVideoURL] = useState("")
     const [postLoader, setPostLoader] = useState<boolean>(false);
     const token = localStorage.getItem("tle-token")
+    const theam = useRecoilValue(Theamatom)
 
     async function handleAddVideo(){
 
@@ -32,8 +35,8 @@ export default function PostVideo(props : {
         setPostLoader(false)
     }
 
-    return(<div>
-        <input type="text" 
+    return(<div className="flex gap-2">
+        <input type="text" className={`outline-none border-1  pl-1 rounded-sm ${theam === 'dark' ? "border-white" : "border-black"}`}
             value={videoURL}
             onChange={(e)=>{
                 setVideoURL(e.target.value)
@@ -41,7 +44,7 @@ export default function PostVideo(props : {
         } />
 
         {postLoader ? <div>WAIT</div> : 
-            <button onClick={()=>{
+            <button className="bg-blue-700 px-2 py-1 text-white rounded-sm" onClick={()=>{
                 handleAddVideo()
             }}>add video</button>}
 

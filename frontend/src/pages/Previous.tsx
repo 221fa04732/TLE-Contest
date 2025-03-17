@@ -2,6 +2,7 @@ import Header from "../components/Header"
 import PastContest from "../components/Past"
 import { Theamatom } from "../atoms/Theam"
 import { useRecoilValue } from "recoil"
+import Footer from "../components/Footer"
 
 export default function PreviousPage(){
 
@@ -15,8 +16,12 @@ export default function PreviousPage(){
             </div>
         </div>
 
-        <div className="w-11/12 mt-14">
+        <div className="w-11/12 min-h-screen">
             <PastContest />
+        </div>
+
+        <div className="mt-6">
+            <Footer />
         </div>
 
     </div>)
