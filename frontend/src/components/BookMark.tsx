@@ -31,7 +31,7 @@ export default function BookMarked(props : {
     }
 
     return(<div>
-        {bookmarkLoader ? <div>WAITING</div> : 
+        {bookmarkLoader ? <img src="./loading.gif" className="min-h-5 max-w-5" /> : 
             <button onClick={()=>{
                     handleBookmark();
                 }}>

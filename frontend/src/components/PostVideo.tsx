@@ -43,8 +43,10 @@ export default function PostVideo(props : {
             }
         } />
 
-        {postLoader ? <div>WAIT</div> : 
-            <button className="bg-blue-700 px-2 py-1 text-white rounded-sm" onClick={()=>{
+        {postLoader ? <button className="bg-blue-700 px-2 py-1 text-white rounded-sm cursor-pointer">
+                <img src="./loading.gif" className="min-h-5 max-w-5" />
+            </button> : 
+            <button className="bg-blue-700 px-2 py-1 text-white rounded-sm cursor-pointer" onClick={()=>{
                 handleAddVideo()
             }}>add video</button>}
 
