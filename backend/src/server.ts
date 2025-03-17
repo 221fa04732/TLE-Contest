@@ -36,6 +36,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
     const dataType = req.query.type;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "none"
     const skip = (page - 1) * limit;
 
     try{
@@ -98,6 +99,14 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                 }
             })
 
+            if(search !== 'none'){
+                upcomminingContest = upcomminingContest.filter((contest: any) =>
+                    String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) || 
+                    contest.contest_type.toLowerCase().includes(search.toLowerCase()) ||
+                    contest.contest_name.toLowerCase().includes(search.toLowerCase())
+                );
+            }
+
             return res.status(200).json({
 
                 upcomminingContest : upcomminingContest.sort((a, b)=> new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime()).slice(skip, skip+limit),
@@ -145,6 +154,14 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                     })
                 }
             })
+
+            if(search !== 'none'){
+                previousContest = previousContest.filter((contest: any) =>
+                    String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) || 
+                    contest.contest_type.toLowerCase().includes(search.toLowerCase()) ||
+                    contest.contest_name.toLowerCase().includes(search.toLowerCase())
+                );
+            }
 
             return res.status(200).json({
 

@@ -25,12 +25,15 @@ export default function FutureContest(){
     const token = localStorage.getItem("tle-token")
     const [futureLoader, setFutureloader] = useRecoilState(FutureLoader)
     const theam = useRecoilValue(Theamatom)
+    const limit = 1;
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasmore] = useState(true)
 
     useEffect(()=>{
         setFutureloader(true)
         const upcommingData = async()=>{
             try{
-                const response = await axios.get('http://localhost:3000/contest',{
+                const response = await axios.get(`http://localhost:3000/contest?type=future&limit=${limit}&page=${page}`,{
                     headers : {
                         Authorization : token
                     }
@@ -38,6 +41,7 @@ export default function FutureContest(){
     
                 if(response){
                     setUpcommingContest(response.data.upcomminingContest)
+                    setHasmore(response.data.hasMore)
                 }
             }
             catch(e){
@@ -53,7 +57,7 @@ export default function FutureContest(){
         const timer = setInterval(upcommingData, 60000)
 
         return ()=> clearInterval(timer)
-    }, [])
+    }, [page])
 
 
     useEffect(() => {
@@ -96,5 +100,13 @@ export default function FutureContest(){
                 ))
             }
         </div>
+
+        <div className="flex justify-center mt-4">
+            {hasMore && <button 
+                className="bg-blue-700 px-2 py-1 text-white rounded-sm flex justify-center cursor-pointer"
+                onClick={() => setPage(page + 1)}>Load More
+            </button>}
+        </div>
+
     </div>)
 }
