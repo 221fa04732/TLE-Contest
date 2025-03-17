@@ -6,6 +6,7 @@ import { useRecoilValue } from "recoil"
 const HomePage = lazy(()=> import('./pages/Home'))
 const UpcommingPage = lazy(()=> import('./pages/Upcomming'))
 const PreviousPage = lazy(()=> import('./pages/Previous'))
+const FavouritePage = lazy(()=> import('./pages/Favorite'))
 
 
 import Unauthorized from "./components/Unauthorized"
@@ -45,6 +46,14 @@ function App() {
           element={
             <Unauthorized>
               <PreviousPage />
+            </Unauthorized>
+          }
+        />
+
+        <Route path="/favourite"
+          element={
+            <Unauthorized>
+              <FavouritePage />
             </Unauthorized>
           }
         />
