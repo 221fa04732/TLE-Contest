@@ -272,14 +272,14 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
             })
         }
 
-        return res.status(400).json({
-            message : "can't fetch the data"
+        return res.status(404).json({
+            message : "Invalid request"
         })
 
     }
     catch(e){
         res.status(404).json({
-            message : "server error"
+            message : "Server error"
         })
     }
 })
@@ -296,8 +296,8 @@ app.post('/signup', async(req : any, res : any)=> {
         })
 
         if(user){
-            return res.status(301).json({
-                message : "user already exist"
+            return res.status(201).json({
+                message : "User already exist"
             })
         }
 
@@ -312,14 +312,14 @@ app.post('/signup', async(req : any, res : any)=> {
         const token = sign({email}, "secret")
 
         res.status(200).json({
-            message : "signin sucessful",
+            message : "Signup sucessful",
             userType : "student",
             token
         })
     }
     catch(e){
         res.status(404).json({
-            message : "server error"
+            message : "Server error"
         })
     }
 })
@@ -339,22 +339,22 @@ app.post('/signin', async(req : any, res : any)=>{
         })
 
         if(!user){
-            return res.status(301).json({
-                message : "user doesn't exist"
+            return res.status(201).json({
+                message : "User doesn't exist"
             })
         }
 
         const token = sign({email} , "secret")
 
         res.status(200).json({
-            message : "signin sucessful",
+            message : "Signin sucessful",
             userType : user.userType,
             token
         })
     }
     catch(e){
         req.status(404).json({
-            message : "server error"
+            message : "Server error"
         })
     }
 })
@@ -381,7 +381,7 @@ app.post('/bookmark', authMiddleware, async(req : any, res : any) => {
             })
 
             res.status(200).json({
-                Message : "contest unmark"
+                Message : "Contest unmark"
             })
             return;
         }
@@ -394,12 +394,12 @@ app.post('/bookmark', authMiddleware, async(req : any, res : any) => {
         })
 
         res.status(200).json({
-            Message : "contest mark"
+            Message : "Contest bookmark"
         })
     }
     catch(e){
         res.status(404).json({
-            message : "server error"
+            message : "Server error"
         })
     }
 
@@ -412,8 +412,8 @@ app.post('/video', authMiddleware, async(req : any, res : any) => {
     const { contestId, videoURL } = req.body
 
     if(userType !== "admin"){
-        res.status(401).json({ 
-            message: "You can't add" 
+        res.status(301).json({ 
+            message: "Unauthorize access" 
         });
         return;
     }
@@ -427,12 +427,12 @@ app.post('/video', authMiddleware, async(req : any, res : any) => {
         })
 
         res.status(200).json({
-            Message : "video added"
+            Message : "Video added"
         })
     }
     catch(e){
         res.status(404).json({
-            message : "server error"
+            message : "Server error"
         })
     }
 })
