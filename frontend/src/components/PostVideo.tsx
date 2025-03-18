@@ -39,7 +39,7 @@ export default function PostVideo(props : {
 
             if(response){
                 setToast({
-                    message : response.data.message,
+                    message : response.data.Message,
                     colour : "green",
                     visible : true
                 })

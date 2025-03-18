@@ -26,7 +26,7 @@ export default function BookMarked(props : {
 
             if(response){
                 setToast({
-                    message : response.data.message,
+                    message : response.data.Message,
                     colour : "green",
                     visible : true
                 })
