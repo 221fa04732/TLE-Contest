@@ -3,9 +3,11 @@ import axios from 'axios'
 import FututreContestCard from "./FutureCard"
 import DebounceHook from "../hooks/Debounce"
 import { FutureLoader } from "../atoms/FutureLoader"
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import Loader from "./Loader"
 import { Theamatom } from "../atoms/Theam"
+import { ToastHandleatom } from "../atoms/ToastHandle"
+import Backup from "./Backup"
 
 export default function FutureContest(){
 
@@ -31,7 +33,8 @@ export default function FutureContest(){
     const theam = useRecoilValue(Theamatom)
     const limit = 20;
     const [page, setPage] = useState(1)
-    const [hasMore, setHasmore] = useState(true)
+    const [hasMore, setHasmore] = useState(false)
+    const setToast = useSetRecoilState(ToastHandleatom)
 
     useEffect(()=>{
         setPage(1)
@@ -53,7 +56,12 @@ export default function FutureContest(){
                 }
             }
             catch(e){
-                console.log("server error")
+                setHasmore(false)
+                setToast({
+                    message : "Server error",
+                    colour : "red",
+                    visible : true
+                })
             }
             finally{
                 setFutureloader(false)
@@ -83,6 +91,7 @@ export default function FutureContest(){
 
         <div className="mt-32">
             {futureLoader ? <Loader /> : 
+                upcommingContest.length > 0 ? 
                 upcommingContest.map((contest)=>(
                     <FututreContestCard key={contest.contest_id+contest.contest_name}
                     contest_type = { contest.contest_type }
@@ -91,8 +100,8 @@ export default function FutureContest(){
                     contest_duration = { contest.contest_duration }
                     contest_time = { contest.contest_time } 
                     bookmarked = {contest.bookmarked}
-                    />
-                ))
+                    /> 
+                )) : <Backup />
             }
         </div>
 

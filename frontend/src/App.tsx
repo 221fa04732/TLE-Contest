@@ -17,6 +17,7 @@ import { Theamatom } from "./atoms/Theam"
 import Hamburger from "./components/Hamburger"
 import { HamburgerAtom } from "./atoms/HamburgerAtom"
 import ScrollToTop from "./components/ScrollTop"
+import ToastNotification from "./components/ToastNotify"
 
 
 function App() {
@@ -29,7 +30,11 @@ function App() {
     <div className={`fixed z-50 ${hamburger ? "block sm:hidden" : "hidden"} right-2 top-16`}>
       <Hamburger />
     </div>
+
     <ScrollToTop />
+
+    <ToastNotification />
+
     <Suspense fallback={<Loader />} >
       <Routes>
 

@@ -3,9 +3,11 @@ import axios from 'axios'
 import PastContestCard from "./PastCard"
 import DebounceHook from "../hooks/Debounce"
 import { PastLoader } from "../atoms/PastLoader"
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import Loader from "./Loader"
 import { Theamatom } from "../atoms/Theam" 
+import { ToastHandleatom } from "../atoms/ToastHandle"
+import Backup from "./Backup"
 
 export default function PastContest(){
 
@@ -31,7 +33,8 @@ export default function PastContest(){
     const theam = useRecoilValue(Theamatom)
     const limit = 20;
     const [page, setPage] = useState(1)
-    const [hasMore, setHasmore] = useState(true)
+    const [hasMore, setHasmore] = useState(false)
+    const setToast = useSetRecoilState(ToastHandleatom)
 
     useEffect(()=>{
         setPage(1)
@@ -54,7 +57,12 @@ export default function PastContest(){
                 }
             }
             catch(e){
-                console.log("server error")
+                setHasmore(false)
+                setToast({
+                    message : "Server error",
+                    colour : "red",
+                    visible : true
+                })
             }
             finally{
                 setPastloader(false)
@@ -85,6 +93,7 @@ export default function PastContest(){
         
         <div className="mt-32">
             {pastLoader ? <Loader /> : 
+                previousContest.length > 0 ?
                 previousContest.map((contest)=>(
                     <PastContestCard key={contest.contest_id+contest.contest_name}
                         contest_type = { contest.contest_type }
@@ -94,7 +103,7 @@ export default function PastContest(){
                         bookmarked = {contest.bookmarked}
                         video = {contest.video}
                     />
-                ))
+                )) : <Backup />
             }
         </div>
 

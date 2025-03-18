@@ -4,7 +4,9 @@ import FututreContestCard from "./FutureCard"
 import PastContestCard from "./PastCard"
 import { BookmarkLoader } from "../atoms/BookmarkLoader"
 import Loader from "./Loader"
-import { useRecoilState } from "recoil"
+import { useRecoilState, useSetRecoilState } from "recoil"
+import { ToastHandleatom } from "../atoms/ToastHandle"
+import Backup from "./Backup"
 
 export default function FavouriteContest(){
 
@@ -29,7 +31,8 @@ export default function FavouriteContest(){
     const [bookmarkLoader, setBookmarkloader] = useRecoilState(BookmarkLoader)
     const limit = 20;
     const [page, setPage] = useState(1)
-    const [hasMore, setHasmore] = useState(true)
+    const [hasMore, setHasmore] = useState(false)
+    const setToast = useSetRecoilState(ToastHandleatom)
 
     useEffect(()=>{
         setBookmarkloader(true)
@@ -47,7 +50,12 @@ export default function FavouriteContest(){
                 }
             }
             catch(e){
-                console.log('server error')
+                setHasmore(false)
+                setToast({
+                    message : "Server error",
+                    colour : "red",
+                    visible : true
+                })
             }
             finally{
                 setBookmarkloader(false)
@@ -65,6 +73,7 @@ export default function FavouriteContest(){
 
         <div>
             {bookmarkLoader ? <Loader /> : 
+                bookmarkContest.length > 0 ?
                 bookmarkContest.map((contest)=>(
                     contest.contest_status === "future" ? 
                     (<FututreContestCard key={contest.contest_id+contest.contest_name}
@@ -83,7 +92,7 @@ export default function FavouriteContest(){
                         bookmarked = {contest.bookmarked}
                         video = {contest.video}
                     />)
-                ))
+                )) : <Backup />
             }
         </div>
 

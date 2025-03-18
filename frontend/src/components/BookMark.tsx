@@ -1,5 +1,7 @@
 import { useState } from "react"
 import axios from 'axios'
+import { ToastHandleatom } from "../atoms/ToastHandle"
+import { useSetRecoilState } from "recoil"
 
 export default function BookMarked(props : {
     contestId : string,
@@ -8,6 +10,7 @@ export default function BookMarked(props : {
 
     const [bookmarkLoader, setBookmarkLoader] = useState(false)
     const token = localStorage.getItem("tle-token")
+    const setToast = useSetRecoilState(ToastHandleatom)
 
     async function handleBookmark() {
         setBookmarkLoader(true)
@@ -21,11 +24,19 @@ export default function BookMarked(props : {
             }) 
 
             if(response){
-                console.log(response.data)
+                setToast({
+                    message : response.data.message,
+                    colour : "green",
+                    visible : true
+                })
             }
         }
         catch(e){
-            console.log("server error")
+            setToast({
+                message : "Server error",
+                colour : "red",
+                visible : true
+            })
         }
         setBookmarkLoader(false)
     }

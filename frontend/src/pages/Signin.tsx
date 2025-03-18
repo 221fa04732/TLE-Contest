@@ -3,9 +3,10 @@ import axios from 'axios'
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { SignLoader } from "../atoms/SignLoader"
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import PasswordVisibleHide from "../components/PassHideVisible"
 import { PasswordVisible } from "../atoms/PasswordVisible"
+import { ToastHandleatom } from "../atoms/ToastHandle"
 
 export default function SigninPage(){
 
@@ -15,8 +16,18 @@ export default function SigninPage(){
     const navigate = useNavigate();
     const [signLoader, setSignloader] = useRecoilState(SignLoader)
     const visible = useRecoilValue(PasswordVisible)
+    const setToast = useSetRecoilState(ToastHandleatom)
 
     async function handleSignIn(){
+
+        if(email === "" || password === ""){
+            setToast({
+                message : "Invalid Input",
+                colour : "red",
+                visible : true
+            })
+            return;
+        }
 
         setSignloader(true)
         try{
@@ -30,10 +41,19 @@ export default function SigninPage(){
                 localStorage.setItem("tle-token", response.data.token)
                 localStorage.setItem("userType", response.data.userType)
                 navigate('/home')
+                setToast({
+                    message : response.data.message,
+                    colour : "green",
+                    visible : true
+                })
             }
         }
         catch(e){
-            console.log("server error")
+            setToast({
+                message : "Server error",
+                colour : "red",
+                visible : true
+            })
         }
         setSignloader(false)
     }

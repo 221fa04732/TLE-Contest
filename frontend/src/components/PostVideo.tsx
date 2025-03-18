@@ -1,7 +1,8 @@
 import { useState } from "react"
 import axios from 'axios'
 import { Theamatom } from "../atoms/Theam"
-import { useRecoilValue } from "recoil"
+import { useRecoilValue, useSetRecoilState } from "recoil"
+import { ToastHandleatom } from "../atoms/ToastHandle"
 
 export default function PostVideo(props : {
     contestId : string
@@ -11,8 +12,18 @@ export default function PostVideo(props : {
     const [postLoader, setPostLoader] = useState<boolean>(false);
     const token = localStorage.getItem("tle-token")
     const theam = useRecoilValue(Theamatom)
+    const setToast = useSetRecoilState(ToastHandleatom)
 
     async function handleAddVideo(){
+
+        if(videoURL === ""){
+            setToast({
+                message : "Invalid Input",
+                colour : "green",
+                visible : true
+            })
+            return;
+        }
 
         setPostLoader(true)
         try{
@@ -26,17 +37,26 @@ export default function PostVideo(props : {
             }) 
 
             if(response){
-                console.log(response.data)
+                setToast({
+                    message : response.data.message,
+                    colour : "green",
+                    visible : true
+                })
             }
         }
         catch(e){
-            console.log("server error")
+            setToast({
+                message : "Server error",
+                colour : "red",
+                visible : true
+            })
         }
         setPostLoader(false)
     }
 
     return(<div className="flex gap-2">
         <input type="text" className={`outline-none border-1  pl-1 rounded-sm ${theam === 'dark' ? "border-white" : "border-black"}`}
+            placeholder="Youtube_Link"
             value={videoURL}
             onChange={(e)=>{
                 setVideoURL(e.target.value)
