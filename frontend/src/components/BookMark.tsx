@@ -2,6 +2,7 @@ import { useState } from "react"
 import axios from 'axios'
 import { ToastHandleatom } from "../atoms/ToastHandle"
 import { useSetRecoilState } from "recoil"
+import { config } from "../config"
 
 export default function BookMarked(props : {
     contestId : string,
@@ -15,7 +16,7 @@ export default function BookMarked(props : {
     async function handleBookmark() {
         setBookmarkLoader(true)
         try{
-            const response = await axios.post('https://tle-contest-backend.onrender.com/bookmark',{
+            const response = await axios.post(`${config.BACKEND_URL}/bookmark`,{
                 contestId : props.contestId,
             },{
                 headers : {

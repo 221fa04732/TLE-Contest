@@ -8,6 +8,7 @@ import Loader from "./Loader"
 import { Theamatom } from "../atoms/Theam"
 import { ToastHandleatom } from "../atoms/ToastHandle"
 import Backup from "./Backup"
+import { config } from '../config'
 
 export default function FutureContest(){
 
@@ -44,7 +45,7 @@ export default function FutureContest(){
         setFutureloader(true)
         const upcommingData = async()=>{
             try{
-                const response = await axios.get(`https://tle-contest-backend.onrender.com/contest?type=future&search=${search}&limit=${limit}&page=${page}`,{
+                const response = await axios.get(`${config.BACKEND_URL}/contest?type=future&search=${search}&limit=${limit}&page=${page}`,{
                     headers : {
                         Authorization : token
                     }

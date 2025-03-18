@@ -7,6 +7,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import PasswordVisibleHide from "../components/PassHideVisible"
 import { PasswordVisible } from "../atoms/PasswordVisible"
 import { ToastHandleatom } from "../atoms/ToastHandle"
+import { config } from "../config"
 
 export default function SignupPage(){
 
@@ -30,7 +31,7 @@ export default function SignupPage(){
 
         setSignloader(true)
         try{
-            const response = await axios.post('https://tle-contest-backend.onrender.com/signup',{
+            const response = await axios.post(`${config.BACKEND_URL}/signup`,{
                 email : email,
                 password : password
             }) 

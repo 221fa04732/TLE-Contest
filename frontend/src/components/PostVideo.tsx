@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Theamatom } from "../atoms/Theam"
 import { useRecoilValue, useSetRecoilState } from "recoil"
 import { ToastHandleatom } from "../atoms/ToastHandle"
+import { config } from "../config"
 
 export default function PostVideo(props : {
     contestId : string
@@ -27,7 +28,7 @@ export default function PostVideo(props : {
 
         setPostLoader(true)
         try{
-            const response = await axios.post('https://tle-contest-backend.onrender.com/video',{
+            const response = await axios.post(`${config.BACKEND_URL}/video`,{
                 contestId : props.contestId,
                 videoURL : videoURL
             },{
