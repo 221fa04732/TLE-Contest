@@ -15,7 +15,7 @@ export default function BookMarked(props : {
     async function handleBookmark() {
         setBookmarkLoader(true)
         try{
-            const response = await axios.post('http://localhost:3000/bookmark',{
+            const response = await axios.post('https://tle-contest-backend.onrender.com/bookmark',{
                 contestId : props.contestId,
             },{
                 headers : {

@@ -44,7 +44,7 @@ export default function FutureContest(){
         setFutureloader(true)
         const upcommingData = async()=>{
             try{
-                const response = await axios.get(`http://localhost:3000/contest?type=future&search=${search}&limit=${limit}&page=${page}`,{
+                const response = await axios.get(`https://tle-contest-backend.onrender.com/contest?type=future&search=${search}&limit=${limit}&page=${page}`,{
                     headers : {
                         Authorization : token
                     }

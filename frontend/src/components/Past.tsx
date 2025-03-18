@@ -45,7 +45,7 @@ export default function PastContest(){
         setPastloader(true)
         const previousData = async()=>{
             try{
-                const response = await axios.get(`http://localhost:3000/contest?type=past&search=${search}&limit=${limit}&page=${page}`,{
+                const response = await axios.get(`https://tle-contest-backend.onrender.com/contest?type=past&search=${search}&limit=${limit}&page=${page}`,{
                     headers : {
                         Authorization : token
                     }

@@ -30,7 +30,7 @@ export default function SignupPage(){
 
         setSignloader(true)
         try{
-            const response = await axios.post('http://localhost:3000/signup',{
+            const response = await axios.post('https://tle-contest-backend.onrender.com/signup',{
                 email : email,
                 password : password
             }) 

@@ -27,7 +27,7 @@ export default function PostVideo(props : {
 
         setPostLoader(true)
         try{
-            const response = await axios.post('http://localhost:3000/video',{
+            const response = await axios.post('https://tle-contest-backend.onrender.com/video',{
                 contestId : props.contestId,
                 videoURL : videoURL
             },{

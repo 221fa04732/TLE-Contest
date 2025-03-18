@@ -38,7 +38,7 @@ export default function FavouriteContest(){
         setBookmarkloader(true)
         const upcommingData = async()=>{
             try{
-                const response = await axios.get(`http://localhost:3000/contest?type=bookmarked&limit=${limit}&page=${page}`,{
+                const response = await axios.get(`https://tle-contest-backend.onrender.com/contest?type=bookmarked&limit=${limit}&page=${page}`,{
                     headers : {
                         Authorization : token
                     }
