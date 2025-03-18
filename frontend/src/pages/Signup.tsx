@@ -65,7 +65,7 @@ export default function SignupPage(){
             <label>Email</label>
             <input
               type="text"
-              className="outline-none border border-white pl-2 min-h-8 min-w-80 mb-3"
+              className="outline-none border border-white pl-2 min-h-8 min-w-60 mb-3"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -75,7 +75,7 @@ export default function SignupPage(){
             <label htmlFor="">Password</label>
             <div className="flex items-center border border-white mb-3">
                 <input type={visible ? "text" : "password"} 
-                    className="outline-none pl-2 min-h-8 min-w-80"
+                    className="outline-none pl-2 min-h-8 min-w-60"
                     value={password}
                     onChange={(e)=>{
                         setPassword(e.target.value)
