@@ -18,7 +18,6 @@ const prisma = new PrismaClient();
 
 
 app.get('/youtube-webhook', (req, res) => {
-    console.log("1")
     const hubChallenge = req.query['hub.challenge'];
     if (hubChallenge) {
         res.status(200).send(hubChallenge);
@@ -29,7 +28,6 @@ app.get('/youtube-webhook', (req, res) => {
 
 
 app.post('/youtube-webhook', async (req, res) => {
-    console.log("2")
     try {
         const parser = new xml2js.Parser();
         const data = await parser.parseStringPromise(req.body);
@@ -59,19 +57,24 @@ async function fetchLatestVideos(){
         const response = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&order=date&type=video&key=${GOOGLE_CLOUD_YOUTUBE_API}&maxResults=50`)
 
         if(response){
-            
-            console.log(response.data)
+
+            console.log(response.data.nextPageToken)
             const data = response.data.items
             const data2 = []
 
             data.map((item)=>{
                 data2.push({
-                    videoId : item.id.videoId,
-                    contestName : item.snippet.title
+                    videoURL : `https://www.youtube.com/watch?v=${item.id.videoId}`,
+                    contestId : formatTitle(item.snippet.title)
                 })
             })
 
-            console.log(data2)
+            const uploadData =await prisma.video.createMany({
+                data : data2,
+                skipDuplicates : true
+            })
+
+            console.log(`No. of video uploaded : ${uploadData.count}`)
         }
     }
     catch(e){
@@ -79,6 +82,22 @@ async function fetchLatestVideos(){
     }
 }
 
+function formatTitle(title) {
+    const patterns = [
+        /(Codechef Starters \d+)/,
+        /(Educational Codeforces Round \d+)/,
+        /(Codeforces Round \d+ \(Div ?\.? ?\d+\))/,
+    ];
+
+    for (const pattern of patterns) {
+        const match = title.match(pattern);
+        if (match) {
+            return match[0].replace(/Div ?(\d+)/, "Div. $1");
+        }
+    }
+
+    return title;
+}
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => console.log(`Webhook running on port ${PORT}`));
