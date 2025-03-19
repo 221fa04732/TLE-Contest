@@ -84,7 +84,7 @@ async function fetchLatestVideos(){
 
 function formatTitle(title) {
     const patterns = [
-        /(codechef starters \d+)/,
+        /(starters \d+)/,
         /(educational codeforces round \d+)/,
         /(codeforces round \d+ \(div ?\.? ?\d+\))/,
     ];
