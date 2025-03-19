@@ -69,6 +69,8 @@ async function fetchLatestVideos(){
                 })
             })
 
+            console.log(data2)
+
             const uploadData =await prisma.video.createMany({
                 data : data2,
                 skipDuplicates : true
