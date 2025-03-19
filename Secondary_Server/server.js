@@ -40,7 +40,7 @@ app.post('/youtube-webhook', async (req, res) => {
                 Link : `https://www.youtube.com/watch?v=${videoId}`
             })
 
-            fetchLatestVideos()
+            fetchLatestVideos(null)
         }
     } 
     catch(error){
@@ -51,10 +51,10 @@ app.post('/youtube-webhook', async (req, res) => {
 });
 
 
-async function fetchLatestVideos(){
+async function fetchLatestVideos(token){
 
     try{
-        const response = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&order=date&type=video&key=${GOOGLE_CLOUD_YOUTUBE_API}&maxResults=50`)
+        const response = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&order=date&type=video&key=${GOOGLE_CLOUD_YOUTUBE_API}&maxResults=50${token ? `&pageToken=${token}` : ''}`)
 
         if(response){
 
@@ -75,6 +75,11 @@ async function fetchLatestVideos(){
             })
 
             console.log(`No. of video uploaded : ${uploadData.count}`)
+
+            if(response.data.nextPageToken){
+                await new Promise((resolve) => setTimeout(resolve, 10000));
+                fetchLatestVideos(response.data.nextPageToken)
+            }
         }
     }
     catch(e){
