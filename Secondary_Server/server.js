@@ -65,11 +65,9 @@ async function fetchLatestVideos(){
             data.map((item)=>{
                 data2.push({
                     videoURL : `https://www.youtube.com/watch?v=${item.id.videoId}`,
-                    contestId : formatTitle(item.snippet.title)
+                    contestId : formatTitle(item.snippet.title.toLowerCase())
                 })
             })
-
-            console.log(data2)
 
             const uploadData =await prisma.video.createMany({
                 data : data2,
@@ -86,15 +84,15 @@ async function fetchLatestVideos(){
 
 function formatTitle(title) {
     const patterns = [
-        /(Codechef Starters \d+)/,
-        /(Educational Codeforces Round \d+)/,
-        /(Codeforces Round \d+ \(Div ?\.? ?\d+\))/,
+        /(codechef starters \d+)/,
+        /(educational codeforces round \d+)/,
+        /(codeforces round \d+ \(div ?\.? ?\d+\))/,
     ];
 
     for (const pattern of patterns) {
         const match = title.match(pattern);
         if (match) {
-            return match[0].replace(/Div ?(\d+)/, "Div. $1");
+            return match[0].replace(/div ?(\d+)/, "div. $1");
         }
     }
 
