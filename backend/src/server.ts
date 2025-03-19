@@ -133,7 +133,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                         hour12: true
                     }),
                     bookmarked : bookmark.some(item => item.contestId === contest.contest_code),
-                    video : (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
+                    video : (videoURL.find(item => item.contestId === contest.contest_name.split(" ").slice(0, 2).join(" ")) || {}).videoURL || ""
                 })
             })
         
@@ -152,7 +152,7 @@ app.get('/contest', authMiddleware, async(req : any, res : any)=>{
                             hour12: true
                         }),
                         bookmarked : bookmark.some(item => item.contestId === contest.id.toString()),
-                        video : (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
+                        video : (videoURL.find(item => item.contestId === contest.name.toString()) || {}).videoURL || ""
                     })
                 }
             })
