@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Bookmark {
+  id        String @id
+  userId    String
+  contestId String
+  User      User   @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id       String     @id
+  name     String
+  password String
+  userType String
+  Bookmark Bookmark[]
+}
+
+model Video {
+  id        Int    @id @default(autoincrement())
+  contestId String @unique
+  videoURL  String
+}

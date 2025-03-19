@@ -11,10 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^6.5.0",
     "axios": "^1.8.3",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.5.0"
   }
 }

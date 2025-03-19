@@ -4,6 +4,7 @@ const xml2js = require('xml2js');
 const axios = require('axios')
 const dotenv = require('dotenv')
 const app = express();
+const { PrismaClient } = require('@prisma/client')
 
 
 dotenv.config();
@@ -13,9 +14,11 @@ app.use(bodyParser.text({ type: 'application/atom+xml' }));
 
 const CHANNEL_ID = process.env.CHANNEL_ID
 const GOOGLE_CLOUD_YOUTUBE_API = process.env.GOOGLE_CLOUD_YOUTUBE_API
+const prisma = new PrismaClient();
 
 
 app.get('/youtube-webhook', (req, res) => {
+    console.log("1")
     const hubChallenge = req.query['hub.challenge'];
     if (hubChallenge) {
         res.status(200).send(hubChallenge);
@@ -26,6 +29,7 @@ app.get('/youtube-webhook', (req, res) => {
 
 
 app.post('/youtube-webhook', async (req, res) => {
+    console.log("2")
     try {
         const parser = new xml2js.Parser();
         const data = await parser.parseStringPromise(req.body);
@@ -55,7 +59,19 @@ async function fetchLatestVideos(){
         const response = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&order=date&type=video&key=${GOOGLE_CLOUD_YOUTUBE_API}&maxResults=50`)
 
         if(response){
+            
             console.log(response.data)
+            const data = response.data.items
+            const data2 = []
+
+            data.map((item)=>{
+                data2.push({
+                    videoId : item.id.videoId,
+                    contestName : item.snippet.title
+                })
+            })
+
+            console.log(data2)
         }
     }
     catch(e){
@@ -64,5 +80,5 @@ async function fetchLatestVideos(){
 }
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => console.log(`Webhook running on port ${PORT}`));
