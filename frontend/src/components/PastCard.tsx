@@ -24,13 +24,22 @@ export default function PastContestCard(props : pastContest){
     else if(props.contest_type === 'codeforces'){
         contestURL=`https://codeforces.com/contests/${props.contest_id}`
     }
+    else if(props.contest_type === 'leetcode'){
+        const tempid = props.contest_id.split('').slice(2, props.contest_id.length).join('')
+        if(props.contest_id[1]==='b'){
+            contestURL=`https://leetcode.com/contest/biweekly-contest-${tempid}`
+        }
+        else{
+            contestURL=`https://leetcode.com/contest/weekly-contest-${tempid}`
+        }
+    }
 
     return(<div className="flex flex-col justify-center p-8 border-1 mt-4">
         <div className="w-full flex justify-between">
             <div className="flex">
                 <div>{props.contest_type === "codechef" ? 
-                    <img src="./codechef.png" className="min-h-6 max-h-6 min-w-6 max-w-6"/> : 
-                    <img src="./codeforces.svg" className="min-h-6 max-h-6 min-w-6 max-w-6"/>}
+                    <img src="./codechef.png" className="min-h-6 max-h-6 min-w-6 max-w-6"/> : props.contest_type === "leetcode" ? 
+                    <img src="./leetcode.svg" className="min-h-6 max-h-6 min-w-6 max-w-6"/> : <img src="./codeforces.svg" className="min-h-6 max-h-6 min-w-6 max-w-6"/>}
                 </div>
                 <div className={`pl-4 text-xl ${theam === 'dark' ? "text-white" : "text-stone-400"}`}>{props.contest_name}</div>
             </div>
