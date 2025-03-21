@@ -18,6 +18,7 @@ const axios_1 = __importDefault(require("axios"));
 const client_1 = require("@prisma/client");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const auth_1 = __importDefault(require("./auth"));
+const leetcode_1 = require("./leetcode");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -38,10 +39,12 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
             }
         });
         const videoURL = yield prisma.video.findMany({});
+        const leetcode = yield (0, leetcode_1.leetcodeContest)();
         let upcomminingContest = [];
         let previousContest = [];
         let bookmarkedupcomminingContest = [];
         let bookmarkedpreviousContest = [];
+        const userLocale = Intl.DateTimeFormat().resolvedOptions().locale || "en-IN";
         if (dataType === "future") {
             codechefContest.data.future_contests.map((contest) => {
                 upcomminingContest.push({
@@ -49,7 +52,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                     contest_id: contest.contest_code,
                     contest_name: contest.contest_name,
                     contest_duration: contest.contest_duration,
-                    contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                    contest_time: new Date(contest.contest_start_date_iso).toLocaleString(userLocale, {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
@@ -67,7 +70,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         contest_id: contest.id.toString(),
                         contest_name: contest.name,
                         contest_duration: contest.durationSeconds.toString(),
-                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString(userLocale, {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
@@ -78,6 +81,22 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         bookmarked: bookmark.some(item => item.contestId === contest.id.toString())
                     });
                 }
+            });
+            upcomminingContest.push({
+                contest_type: leetcode.weeklyContest.upcomming.contest_type,
+                contest_id: leetcode.weeklyContest.upcomming.contest_id,
+                contest_name: leetcode.weeklyContest.upcomming.contest_name,
+                contest_duration: leetcode.weeklyContest.upcomming.contest_duration,
+                contest_time: leetcode.weeklyContest.upcomming.contest_time,
+                bookmarked: bookmark.some(item => item.contestId === leetcode.weeklyContest.upcomming.contest_id)
+            });
+            upcomminingContest.push({
+                contest_type: leetcode.biweeklyContest.upcomming.contest_type,
+                contest_id: leetcode.biweeklyContest.upcomming.contest_id,
+                contest_name: leetcode.biweeklyContest.upcomming.contest_name,
+                contest_duration: leetcode.biweeklyContest.upcomming.contest_duration,
+                contest_time: leetcode.biweeklyContest.upcomming.contest_time,
+                bookmarked: bookmark.some(item => item.contestId === leetcode.biweeklyContest.upcomming.contest_id)
             });
             if (search !== "") {
                 upcomminingContest = upcomminingContest.filter((contest) => String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) ||
@@ -95,7 +114,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                     contest_type: "codechef",
                     contest_id: contest.contest_code,
                     contest_name: contest.contest_name,
-                    contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                    contest_time: new Date(contest.contest_start_date_iso).toLocaleString(userLocale, {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
@@ -113,7 +132,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         contest_type: "codeforces",
                         contest_id: contest.id.toString(),
                         contest_name: contest.name,
-                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString(userLocale, {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
@@ -125,6 +144,26 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         video: (videoURL.find(item => item.contestId === contest.name.toString().toLowerCase()) || {}).videoURL || ""
                     });
                 }
+            });
+            leetcode.weeklyContest.past.map((contest) => {
+                previousContest.push({
+                    contest_type: contest.contest_type,
+                    contest_id: contest.contest_id,
+                    contest_name: contest.contest_name,
+                    contest_time: contest.contest_time,
+                    bookmarked: bookmark.some(item => item.contestId === contest.contest_id),
+                    video: (videoURL.find(item => item.contestId.split(" ").slice(0, 4).join(" ") === contest.contest_name.toLowerCase()) || {}).videoURL || ""
+                });
+            });
+            leetcode.biweeklyContest.past.map((contest) => {
+                previousContest.push({
+                    contest_type: contest.contest_type,
+                    contest_id: contest.contest_id,
+                    contest_name: contest.contest_name,
+                    contest_time: contest.contest_time,
+                    bookmarked: bookmark.some(item => item.contestId === contest.contest_id),
+                    video: (videoURL.find(item => item.contestId.split(" ").slice(0, 4).join(" ") === contest.contest_name.toLowerCase()) || {}).videoURL || ""
+                });
             });
             if (search !== "") {
                 previousContest = previousContest.filter((contest) => String(contest.contest_id).toLowerCase().includes(search.toLowerCase()) ||
@@ -144,7 +183,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         contest_id: contest.contest_code,
                         contest_name: contest.contest_name,
                         contest_duration: contest.contest_duration,
-                        contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                        contest_time: new Date(contest.contest_start_date_iso).toLocaleString(userLocale, {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
@@ -164,7 +203,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         contest_id: contest.id.toString(),
                         contest_name: contest.name,
                         contest_duration: contest.durationSeconds.toString(),
-                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString(userLocale, {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
@@ -183,7 +222,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         contest_type: "codechef",
                         contest_id: contest.contest_code,
                         contest_name: contest.contest_name,
-                        contest_time: new Date(contest.contest_start_date_iso).toLocaleString("en-IN", {
+                        contest_time: new Date(contest.contest_start_date_iso).toLocaleString(userLocale, {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
@@ -193,7 +232,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         }),
                         contest_status: "past",
                         bookmarked: true,
-                        video: (videoURL.find(item => item.contestId === contest.contest_code) || {}).videoURL || ""
+                        video: (videoURL.find(item => item.contestId === contest.contest_name.toLowerCase().split(" ").slice(0, 2).join(" ")) || {}).videoURL || ""
                     });
                 }
             });
@@ -203,7 +242,7 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         contest_type: "codeforces",
                         contest_id: contest.id.toString(),
                         contest_name: contest.name,
-                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString("en-IN", {
+                        contest_time: new Date(contest.startTimeSeconds * 1000).toLocaleString(userLocale, {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
@@ -213,10 +252,58 @@ app.get('/contest', auth_1.default, (req, res) => __awaiter(void 0, void 0, void
                         }),
                         contest_status: "past",
                         bookmarked: true,
-                        video: (videoURL.find(item => item.contestId === contest.id.toString()) || {}).videoURL || ""
+                        video: (videoURL.find(item => item.contestId === contest.name.toString().toLowerCase()) || {}).videoURL || ""
                     });
                 }
             });
+            leetcode.weeklyContest.past.forEach((contest) => {
+                if (bookmark.some(item => item.contestId === contest.contest_id)) {
+                    bookmarkedpreviousContest.push({
+                        contest_type: contest.contest_type,
+                        contest_id: contest.contest_id,
+                        contest_name: contest.contest_name,
+                        contest_time: contest.contest_time,
+                        contest_status: "past",
+                        video: (videoURL.find(item => item.contestId.split(" ").slice(0, 4).join(" ") === contest.contest_name.toLowerCase()) || {}).videoURL || "",
+                        bookmarked: true
+                    });
+                }
+            });
+            leetcode.biweeklyContest.past.forEach((contest) => {
+                if (bookmark.some(item => item.contestId === contest.contest_id)) {
+                    bookmarkedpreviousContest.push({
+                        contest_type: contest.contest_type,
+                        contest_id: contest.contest_id,
+                        contest_name: contest.contest_name,
+                        contest_time: contest.contest_time,
+                        contest_status: "past",
+                        video: (videoURL.find(item => item.contestId.split(" ").slice(0, 4).join(" ") === contest.contest_name.toLowerCase()) || {}).videoURL || "",
+                        bookmarked: true
+                    });
+                }
+            });
+            if (bookmark.some(item => item.contestId === leetcode.weeklyContest.upcomming.contest_id)) {
+                bookmarkedupcomminingContest.push({
+                    contest_type: leetcode.weeklyContest.upcomming.contest_type,
+                    contest_id: leetcode.weeklyContest.upcomming.contest_id,
+                    contest_name: leetcode.weeklyContest.upcomming.contest_name,
+                    contest_duration: leetcode.weeklyContest.upcomming.contest_duration,
+                    contest_time: leetcode.weeklyContest.upcomming.contest_time,
+                    contest_status: "future",
+                    bookmarked: true
+                });
+            }
+            if (bookmark.some(item => item.contestId === leetcode.biweeklyContest.upcomming.contest_id)) {
+                bookmarkedupcomminingContest.push({
+                    contest_type: leetcode.biweeklyContest.upcomming.contest_type,
+                    contest_id: leetcode.biweeklyContest.upcomming.contest_id,
+                    contest_name: leetcode.biweeklyContest.upcomming.contest_name,
+                    contest_duration: leetcode.biweeklyContest.upcomming.contest_duration,
+                    contest_time: leetcode.biweeklyContest.upcomming.contest_time,
+                    contest_status: "future",
+                    bookmarked: true
+                });
+            }
             bookmarkedupcomminingContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime());
             bookmarkedpreviousContest.sort((a, b) => new Date(a.contest_time).getTime() - new Date(b.contest_time).getTime()).reverse();
             const allBookmark = [...bookmarkedupcomminingContest, ...bookmarkedpreviousContest];
