@@ -6,7 +6,7 @@ type CountdownProps = {
 
 const CountdownTimer: React.FC<CountdownProps> = ({ targetDate }) => {
   const parseDate = (dateStr: string): Date => {
-    const [day, month, year, time, period] = dateStr.split(/[\s,]+/);
+    const [month, day, year, time, period] = dateStr.split(/[\s,]+/);
     const months: Record<string, number> = {
       Jan: 0, 
       Feb: 1, 
@@ -46,13 +46,11 @@ const CountdownTimer: React.FC<CountdownProps> = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   useEffect(() => {
-    
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
     return () => clearInterval(timer);
-
   }, [targetDate]);
 
   return (
