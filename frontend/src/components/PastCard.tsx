@@ -42,5 +42,9 @@ export default function PastContestCard(props : pastContest){
             <a href={contestURL} target="_blank" className="bg-blue-700 px-2 py-1 text-white rounded-sm flex justify-center">Go to Contest</a>
             {props.video === "" ? (userType === "admin" ? <PostVideo contestId={props.contest_name.toLowerCase()} /> : null) : <a href={props.video} target="_blank" className="bg-blue-700 px-2 py-1 text-white rounded-sm flex justify-center">Video Solution</a>}
         </div>
+        
+        <div className="flex justify-end">
+            {props.video === "" ? <div className="text-red-600 text-xs hidden sm:block pt-2">Either video not published yet or expected title mismatch</div> : null}
+        </div>
     </div>)
 }
