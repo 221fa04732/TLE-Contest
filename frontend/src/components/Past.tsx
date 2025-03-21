@@ -12,11 +12,6 @@ import { config } from "../config"
 
 export default function PastContest(){
 
-    window.scroll({
-        top : 0,
-        behavior : "smooth"
-    })
-
     type pastContest = {
         contest_type : string
         contest_id : string
@@ -112,15 +107,28 @@ export default function PastContest(){
 
             {page > 1 && <button 
                 className="bg-red-400 px-2 py-1 text-white rounded-sm flex justify-center cursor-pointer"
-                onClick={() => setPage(page - 1)}>⬅ Previous page
+                onClick={() => {
+                    setPage(page -1)
+                    scrollTop()
+                }}>⬅ Previous page
             </button>}
 
             {hasMore && <button 
                 className="bg-green-400 px-2 py-1 text-white rounded-sm flex justify-center cursor-pointer"
-                onClick={() => setPage(page + 1)}>Next Page ➡
+                onClick={() => {
+                    setPage(page + 1)
+                    scrollTop()
+                }}>Next Page ➡
             </button>}
         </div>
 
     </div>)
 
 }   
+
+function scrollTop(){
+    window.scroll({
+        top : 0,
+        behavior : "smooth"
+    })
+}
