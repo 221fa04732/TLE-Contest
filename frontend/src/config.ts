@@ -2,7 +2,7 @@ export const config = {
     
     //         1. for production
     //      -----------------------
-    BACKEND_URL : "https://tle-contest-backend.vercel.app"
+    BACKEND_URL : "https://tle-contest-backend.onrender.com"
 
 
     //        2. for local development
