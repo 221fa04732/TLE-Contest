@@ -41,6 +41,10 @@ export default function EditProfile(){
                         Authorization : token
                     }
                 })
+
+                if(response){
+                    localStorage.setItem("codechefID", codechef)
+                }
     
                 setAlertmessage({
                     visible : true,
@@ -81,6 +85,10 @@ export default function EditProfile(){
                     }
                 })
     
+                if(response){
+                    localStorage.setItem("leetcodeID", leetcode)
+                }
+
                 setAlertmessage({
                     visible : true,
                     message : response.data.Message,
@@ -119,6 +127,10 @@ export default function EditProfile(){
                         Authorization : token
                     }
                 })
+
+                if(response){
+                    localStorage.setItem("codeforcesID", codeforces)
+                }
     
                 setAlertmessage({
                     visible : true,

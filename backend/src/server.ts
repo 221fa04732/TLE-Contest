@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { response } from 'express'
 import cors from 'cors'
 import axios from 'axios'
 import { PrismaClient } from '@prisma/client';
@@ -31,6 +31,39 @@ type previousContest = {
     bookmarked : boolean
     video : string
 }
+
+
+type leetcodeData = {
+    totalSolved : number,
+    easySolved : number,
+    mediumSolved : number,
+    hardSolved : number,
+    rank : number,
+    reputation : number,
+}
+
+type codechefData = {
+    userName : string,
+    currentRating : number,
+    highestRating : number,
+    country : string,
+    GlobalRank : number,
+    countryRank : number,
+    star : string,
+    totalContest : number
+}
+
+
+type codeforcesData = {
+    contribution : number,
+    rating : number,
+    friend : number,
+    rank : string,
+    userName : string,
+    highestRating : number,
+    highestRank : string
+}
+
 
 
 app.get('/contest', authMiddleware, async(req : any, res : any)=>{
@@ -393,7 +426,7 @@ app.post('/signup', async(req : any, res : any)=> {
         })
 
         if(user){
-            return res.status(201).json({
+            return res.status(404).json({
                 message : "User already exist"
             })
         }
@@ -457,9 +490,10 @@ app.post('/signin', async(req : any, res : any)=>{
         })
 
         if(!user){
-            return res.status(201).json({
+            return res.status(404).json({
                 message : "User doesn't exist"
             })
+            
         }
 
         const token = sign({email} , "secret")
@@ -583,6 +617,20 @@ app.post('/codechef-profile', authMiddleware, async(req : any, res : any) => {
     const { codechefURL } = req.body
 
     try{
+
+        const codechef = await prisma.codechefProfile.findFirst({
+            where : {
+                userId : userId
+            }
+        })
+
+        if(codechef){
+            await prisma.codechefProfile.delete({
+                where : {
+                    id : codechef.id
+                }
+            })
+        }
         await prisma.codechefProfile.create({
             data : {
                 userId : userId,
@@ -608,6 +656,21 @@ app.post('/leetcode-profile', authMiddleware,  async(req : any, res : any) => {
     const { leetcodeURL } = req.body
 
     try{
+
+        const leetcode = await prisma.leetcodeProfile.findFirst({
+            where : {
+                userId : userId
+            }
+        })
+
+        if(leetcode){
+            await prisma.leetcodeProfile.delete({
+                where : {
+                    id : leetcode.id
+                }
+            })
+        }
+
         await prisma.leetcodeProfile.create({
             data : {
                 userId : userId,
@@ -633,6 +696,20 @@ app.post('/codeforces-profile', authMiddleware, async(req : any, res : any) => {
     const { codeforcesURL } = req.body
 
     try{
+        const codeforces = await prisma.codeforcesProfile.findFirst({
+            where : {
+                userId : userId
+            }
+        })
+
+        if(codeforces){
+            await prisma.codechefProfile.delete({
+                where : {
+                    id : codeforces.id
+                }
+            })
+        }
+
         await prisma.codeforcesProfile.create({
             data : {
                 userId : userId,
@@ -643,7 +720,94 @@ app.post('/codeforces-profile', authMiddleware, async(req : any, res : any) => {
         res.status(200).json({
             Message : "Codeforces URL added"
         })
+        
     }
+    catch(e){
+        res.status(404).json({
+            message : "Server error"
+        })
+    }
+})
+
+
+
+app.post('/analytic-leetcode', authMiddleware, async(req : any, res : any)=>{
+
+    const { leetcodeID } = req.body
+    try{
+        const leetcode = await axios.get(`https://leetcode-api-faisalshohag.vercel.app/${leetcodeID}`)
+
+        const leetcodeData : leetcodeData = {
+                totalSolved : leetcode.data.totalSolved,
+                easySolved : leetcode.data.easySolved,
+                mediumSolved : leetcode.data.mediumSolved,
+                hardSolved : leetcode.data.hardSolved,
+                rank : leetcode.data.ranking,
+                reputation : leetcode.data.reputation,
+        }
+
+        res.status(200).json({
+            leetcodeData
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "Server error"
+        })
+    }
+})
+
+
+app.post('/analytic-codechef', authMiddleware, async(req : any, res : any)=>{
+
+    const { codechefID } = req.body
+
+        try{
+
+            const codechef = await axios.get(`https://codechef-api.vercel.app/handle/${codechefID}`)
+            const codechefData : codechefData = {
+                userName : codechef.data.name,
+                currentRating : codechef.data.currentRating,
+                highestRating : codechef.data.highestRating,
+                country : codechef.data.countryName,
+                GlobalRank : codechef.data.globalRank,
+                countryRank : codechef.data.countryRank,
+                star : codechef.data.stars,
+                totalContest : codechef.data.ratingData.length
+            }
+
+        res.status(200).json({
+            codechefData
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "Server error"
+        })
+    }
+})
+
+
+app.post('/analytic-codeforces', authMiddleware, async(req : any, res : any)=>{
+
+    const { codeforcesID } = req.body
+
+        try{
+        const codeforces = await axios.get(`https://codeforces.com/api/user.info?handles=${codeforcesID}`)
+            const codeforcesData : codeforcesData = {
+                contribution : codeforces.data.result[0].contribution,
+                rating : codeforces.data.result[0].rating,
+                friend : codeforces.data.result[0].friendOfCount,
+                rank : codeforces.data.result[0].rank,
+                userName : codeforces.data.result[0].handle,
+                highestRating :codeforces.data.result[0].maxRating,
+                highestRank : codeforces.data.result[0].maxRank
+            }
+
+            res.status(200).json({
+                codeforcesData
+            }) 
+        }
     catch(e){
         res.status(404).json({
             message : "Server error"
