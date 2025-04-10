@@ -7,6 +7,9 @@ const HomePage = lazy(()=> import('./pages/Home'))
 const UpcommingPage = lazy(()=> import('./pages/Upcomming'))
 const PreviousPage = lazy(()=> import('./pages/Previous'))
 const FavouritePage = lazy(()=> import('./pages/Favorite'))
+const AnalyticsPage = lazy(()=> import('./pages/Analytics'))
+const AdminPage = lazy(()=> import('./pages/Admin'))
+const EditProfile = lazy(()=> import('./pages/EditProfile'))
 
 
 import Unauthorized from "./components/Unauthorized"
@@ -18,12 +21,16 @@ import Hamburger from "./components/Hamburger"
 import { HamburgerAtom } from "./atoms/HamburgerAtom"
 import ScrollToTop from "./components/ScrollTop"
 import ToastNotification from "./components/ToastNotify"
+import Profile from "./components/Profile"
+import { Profileatom } from "./atoms/Profileatom"
 
 
 function App() {
 
   const theam = useRecoilValue(Theamatom)
   const hamburger = useRecoilValue(HamburgerAtom)
+  const profileVisible = useRecoilValue(Profileatom)
+  console.log(profileVisible)
 
   return (<div className={`${theam === 'dark' ? 'bg-stone-800 text-gray-400' : 'bg-white text-black'} min-h-screen`}>
     
@@ -32,6 +39,11 @@ function App() {
     </div>
 
     <ScrollToTop />
+
+    <div className={`fixed z-50 right-1 top-16 ${profileVisible ? "block" : "hidden"}`}>
+      < Profile />
+    </div>
+
 
     <ToastNotification />
 
@@ -66,6 +78,30 @@ function App() {
           element={
             <Unauthorized>
               <FavouritePage />
+            </Unauthorized>
+          }
+        />
+
+        <Route path="/analytics"
+          element={
+            <Unauthorized>
+              <AnalyticsPage />
+            </Unauthorized>
+          }
+        />
+
+        <Route path="/admin"
+          element={
+            <Unauthorized>
+              <AdminPage />
+            </Unauthorized>
+          }
+        />
+
+        <Route path="/editprofile"
+          element={
+            <Unauthorized>
+              <EditProfile />
             </Unauthorized>
           }
         />

@@ -408,9 +408,30 @@ app.post('/signup', async(req : any, res : any)=> {
 
         const token = sign({email}, "secret")
 
+        const leetcodeURL = await prisma.leetcodeProfile.findFirst({
+            where : {
+                userId : newUser.id
+            }
+        })
+
+        const codeforcesURL = await prisma.codeforcesProfile.findFirst({
+            where : {
+                userId : newUser.id
+            }
+        })
+
+        const codechefURL = await prisma.codechefProfile.findFirst({
+            where : {
+                userId : newUser.id
+            }
+        })
+
         res.status(200).json({
             message : "Signup sucessful",
             userType : "student",
+            leetcodeURL : leetcodeURL,
+            codechefURL : codechefURL,
+            codeforcesURL : codeforcesURL,
             token
         })
     }
@@ -443,14 +464,35 @@ app.post('/signin', async(req : any, res : any)=>{
 
         const token = sign({email} , "secret")
 
+        const leetcodeURL = await prisma.leetcodeProfile.findFirst({
+            where : {
+                userId : user.id
+            }
+        })
+
+        const codeforcesURL = await prisma.codeforcesProfile.findFirst({
+            where : {
+                userId : user.id
+            }
+        })
+
+        const codechefURL = await prisma.codechefProfile.findFirst({
+            where : {
+                userId : user.id
+            }
+        })
+
         res.status(200).json({
             message : "Signin sucessful",
             userType : user.userType,
+            leetcodeURL : leetcodeURL?.leetcode,
+            codechefURL : codechefURL?.codechef,
+            codeforcesURL : codeforcesURL?.codeforces,
             token
         })
     }
     catch(e){
-        req.status(404).json({
+        res.status(404).json({
             message : "Server error"
         })
     }
@@ -534,6 +576,80 @@ app.post('/video', authMiddleware, async(req : any, res : any) => {
     }
 })
 
+
+app.post('/codechef-profile', authMiddleware, async(req : any, res : any) => {
+
+    const { userId } = req.userInfo
+    const { codechefURL } = req.body
+
+    try{
+        await prisma.codechefProfile.create({
+            data : {
+                userId : userId,
+                codechef : codechefURL
+            }
+        })
+
+        res.status(200).json({
+            Message : "Codechef URL added"
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "Server error"
+        })
+    }
+})
+
+
+app.post('/leetcode-profile', authMiddleware,  async(req : any, res : any) => {
+
+    const { userId } = req.userInfo
+    const { leetcodeURL } = req.body
+
+    try{
+        await prisma.leetcodeProfile.create({
+            data : {
+                userId : userId,
+                leetcode : leetcodeURL
+            }
+        })
+
+        res.status(200).json({
+            Message : "Leetcode URL added"
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "Server error"
+        })
+    }
+})
+
+
+app.post('/codeforces-profile', authMiddleware, async(req : any, res : any) => {
+
+    const { userId } = req.userInfo
+    const { codeforcesURL } = req.body
+
+    try{
+        await prisma.codeforcesProfile.create({
+            data : {
+                userId : userId,
+                codeforces : codeforcesURL
+            }
+        })
+
+        res.status(200).json({
+            Message : "Codeforces URL added"
+        })
+    }
+    catch(e){
+        res.status(404).json({
+            message : "Server error"
+        })
+    }
+})
 
 app.listen(3000, ()=>{
     console.log('server is listining')

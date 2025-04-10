@@ -41,6 +41,10 @@ export default function SigninPage(){
             if(response){
                 localStorage.setItem("tle-token", response.data.token)
                 localStorage.setItem("userType", response.data.userType)
+                localStorage.setItem("email", email)
+                localStorage.setItem("leetcodeID", response.data.leetcodeURL)
+                localStorage.setItem("codechefID", response.data.codechefURL)
+                localStorage.setItem("codeforcesID", response.data.codeforcesURL)
                 navigate('/home')
                 setToast({
                     message : response.data.message,
