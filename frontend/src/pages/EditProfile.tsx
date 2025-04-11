@@ -4,6 +4,7 @@ import { useRecoilState, useSetRecoilState } from "recoil"
 import axios from "axios"
 import { config } from "../config"
 import { Profileloaderatom } from "../atoms/ProfileLoader"
+import Footer from "../components/Footer"
 
 
 export default function EditProfile(){
@@ -271,6 +272,10 @@ export default function EditProfile(){
                 }} className="text-lg px-4 py-2 rounded-md  shadow-black shadow-md">Update</button>
             </div>
         </fieldset>
+
+        <div className="flex justify-center w-full sm:mt-16">
+            < Footer />
+        </div>
         
     </div>)
 }

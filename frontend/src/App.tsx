@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useEffect } from "react"
 import { Route, Routes } from "react-router-dom"
 import { useRecoilValue } from "recoil"
 
@@ -23,6 +23,7 @@ import ScrollToTop from "./components/ScrollTop"
 import ToastNotification from "./components/ToastNotify"
 import Profile from "./components/Profile"
 import { Profileatom } from "./atoms/Profileatom"
+import Chatbot from "./components/Chatbot"
 
 
 function App() {
@@ -31,6 +32,10 @@ function App() {
   const hamburger = useRecoilValue(HamburgerAtom)
   const profileVisible = useRecoilValue(Profileatom)
   console.log(profileVisible)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theam);
+  }, [theam]);
 
   return (<div className={`${theam === 'dark' ? 'bg-stone-800 text-gray-400' : 'bg-white text-black'} min-h-screen`}>
     
@@ -44,6 +49,9 @@ function App() {
       < Profile />
     </div>
 
+    <div className="fixed z-50 bottom-4 right-4">
+      <Chatbot />
+    </div>
 
     <ToastNotification />
 
