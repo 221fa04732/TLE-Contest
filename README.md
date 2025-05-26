@@ -1,3 +1,6 @@
+![image](https://github.com/user-attachments/assets/70eca308-bd33-47db-9b90-a7ef3fc5d6f2)
+
+
 # **TLE Contest - Local Setup Guide**
 
 ## **Getting Started**
